@@ -1,147 +1,139 @@
 import React, { useState } from 'react';
-import { X, CheckCircle } from 'lucide-react';
-import { orderService } from '../services/mockData';
+import { X, MessageCircle } from 'lucide-react';
 
-const OrderModal = ({ breed, isOpen, onClose }) => {
+const OrderModal = ({ isOpen, onClose, product, quantity }) => {
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
         address: '',
-        quantity: 1
+        pincode: ''
     });
 
-    if (!isOpen || !breed) return null;
+    if (!isOpen || !product) return null;
+
+    const totalAmount = product.price * quantity;
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleConfirm = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Create Order
-        const orderItems = [
-            {
-                breedId: breed.id,
-                breedName: breed.name,
-                price: breed.price_pair,
-                quantity: parseInt(formData.quantity)
-            }
-        ];
+        // Construct WhatsApp message
+        const message = `I placed order for ${product.name} from website.
+Shipping Address: ${formData.address}, Pincode: ${formData.pincode}
+Phone: ${formData.phone}
+Quantity: ${quantity}
+Total Price: $${totalAmount.toFixed(2)}`;
 
-        const totalAmount = breed.price_pair * parseInt(formData.quantity);
+        const whatsappUrl = `https://wa.me/917736681820?text=${encodeURIComponent(message)}`;
 
-        const newOrder = orderService.create({
-            customerName: formData.name,
-            phone: formData.phone,
-            address: formData.address,
-            items: orderItems,
-            totalAmount: totalAmount
-        });
-
-        // WhatsApp Redirection
-        const message = `Halo Lavender Aquafarm! 👋\n\nI confirmed the order #${newOrder.id} through the website.\n\n*Order Details:*\nBreed: ${breed.name}\nQuantity: ${formData.quantity} Pair(s)\nTotal Price: ₹${totalAmount}\n\n*My Details:*\nName: ${formData.name}\nAddress: ${formData.address}`;
-
-        const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
-
+        // Redirect to WhatsApp
         window.open(whatsappUrl, '_blank');
         onClose();
-        // Ideally clear form here
-        setFormData({ name: '', phone: '', address: '', quantity: 1 });
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-indigo-50">
-                    <h3 className="text-xl font-bold text-indigo-900">Place Order</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-                        <X size={24} />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                onClick={onClose}
+            ></div>
+
+            {/* Modal */}
+            <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-surface-dark p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-6">
+                        Complete Your Order
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-white/10"
+                    >
+                        <X size={20} />
                     </button>
                 </div>
 
-                <div className="p-6">
-                    <div className="mb-6 flex items-start space-x-4 bg-blue-50 p-4 rounded-xl">
+                {/* Order Summary */}
+                <div className="mb-6 rounded-xl bg-purple-50 dark:bg-purple-900/20 p-4">
+                    <div className="flex items-center gap-4">
                         <img
-                            src={breed.images[0]}
-                            alt={breed.name}
-                            className="w-20 h-20 object-cover rounded-lg shadow-sm"
+                            src={product.image}
+                            alt={product.name}
+                            className="h-16 w-16 rounded-lg object-cover bg-white dark:bg-gray-800"
                         />
                         <div>
-                            <h4 className="font-bold text-gray-900">{breed.name}</h4>
-                            <p className="text-sm text-gray-600">{breed.quality} Quality</p>
-                            <p className="text-indigo-600 font-bold mt-1">₹{breed.price_pair}/pair</p>
+                            <h4 className="font-bold text-gray-900 dark:text-white">{product.name}</h4>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {quantity} x ${product.price.toFixed(2)}
+                            </div>
+                        </div>
+                        <div className="ml-auto text-xl font-bold text-primary">
+                            ${totalAmount.toFixed(2)}
                         </div>
                     </div>
-
-                    <form onSubmit={handleConfirm} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                            <input
-                                required
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                placeholder="John Doe"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <input
-                                    required
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                    placeholder="+91..."
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Quantity (Pairs)</label>
-                                <input
-                                    required
-                                    type="number"
-                                    min="1"
-                                    name="quantity"
-                                    value={formData.quantity}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Shipping Address</label>
-                            <textarea
-                                required
-                                name="address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                rows="3"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none"
-                                placeholder="Full address with pincode..."
-                            ></textarea>
-                        </div>
-
-                        <div className="pt-4">
-                            <button
-                                type="submit"
-                                className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2"
-                            >
-                                <span>Confirm Order</span>
-                                <CheckCircle size={20} />
-                            </button>
-                            <p className="text-xs text-center text-gray-500 mt-3">
-                                On clicking confirm order, you will be redirected to WhatsApp for payment.
-                            </p>
-                        </div>
-                    </form>
                 </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            required
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-[#191022] dark:border-gray-600 dark:text-white sm:text-sm"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="John Doe"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
+                        <input
+                            type="tel"
+                            name="phone"
+                            required
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-[#191022] dark:border-gray-600 dark:text-white sm:text-sm"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder="9876543210"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shipping Address</label>
+                        <textarea
+                            name="address"
+                            required
+                            rows="2"
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-[#191022] dark:border-gray-600 dark:text-white sm:text-sm"
+                            value={formData.address}
+                            onChange={handleChange}
+                            placeholder="House No, Street, City"
+                        ></textarea>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pincode</label>
+                        <input
+                            type="text"
+                            name="pincode"
+                            required
+                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-[#191022] dark:border-gray-600 dark:text-white sm:text-sm"
+                            value={formData.pincode}
+                            onChange={handleChange}
+                            placeholder="682001"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] hover:bg-[#20bd5a] focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2"
+                    >
+                        <MessageCircle size={20} />
+                        Confirm via WhatsApp
+                    </button>
+                </form>
             </div>
         </div>
     );
