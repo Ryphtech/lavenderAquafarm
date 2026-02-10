@@ -72,9 +72,9 @@ const Admin = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background-light dark:bg-background-dark pt-20 pb-12 px-4 lg:px-8">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark pt-28 pb-12 px-4 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white">Admin Dashboard</h1>
                     <div className="flex bg-white dark:bg-surface-dark p-1 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
                         <button
@@ -132,7 +132,7 @@ const Admin = () => {
                                             <td className="p-4 font-bold text-primary">${order.totalAmount.toFixed(2)}</td>
                                             <td className="p-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'Confirmed' || order.status === 'Packed'
-                                                        ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                                    ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                                     }`}>
                                                     {order.status}
                                                 </span>
@@ -148,8 +148,8 @@ const Admin = () => {
                                                     <button
                                                         onClick={() => toggleOrderStatus(order.id)}
                                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${order.status === 'Packed'
-                                                                ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
-                                                                : 'bg-gray-100 text-gray-600 hover:bg-green-500 hover:text-white'
+                                                            ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                                                            : 'bg-gray-100 text-gray-600 hover:bg-green-500 hover:text-white'
                                                             }`}
                                                     >
                                                         {order.status === 'Packed' ? <Check size={14} /> : <Package size={14} />}
@@ -227,7 +227,7 @@ const Admin = () => {
                                 <div>
                                     <h4 className="text-xs font-bold uppercase text-gray-400 mb-2">Status</h4>
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedOrder.status === 'Confirmed' || selectedOrder.status === 'Packed'
-                                            ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                         }`}>
                                         {selectedOrder.status}
                                     </span>

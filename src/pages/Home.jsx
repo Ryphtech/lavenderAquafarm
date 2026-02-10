@@ -31,11 +31,11 @@ const Home = () => {
     return (
         <div className="pb-12">
             {/* Hero Section Wrapper */}
-            <div className="md:max-w-[1280px] md:mx-auto md:px-4 md:pt-24">
+            <div className="md:max-w-[1280px] md:mx-auto md:px-4 md:pt-32 pt-28">
                 <div className="relative min-h-[90vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden rounded-b-[3rem] md:rounded-[2.5rem] bg-gray-900 shadow-2xl ring-1 ring-white/10">
                     {/* Background Image */}
                     <div className="absolute inset-0">
-                        <div className="h-full w-full bg-cover md:bg-contain bg-center md:bg-no-repeat transform scale-105" style={{ backgroundImage: "url('https://splashyfishstore.com/cdn/shop/articles/Low_Light_Freshwater_Plants_for_Aquarium_6262a715-dc3d-4b38-99e7-d6eb4bdfc327.jpg?v=1757836664')" }}></div>
+                        <div className="h-full w-full bg-cover bg-center transform scale-105" style={{ backgroundImage: "url('https://splashyfishstore.com/cdn/shop/articles/Low_Light_Freshwater_Plants_for_Aquarium_6262a715-dc3d-4b38-99e7-d6eb4bdfc327.jpg?v=1757836664')" }}></div>
                         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-purple-900/40 to-black/80"></div>
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                     </div>
@@ -141,7 +141,7 @@ const Home = () => {
             </div>
 
             {/* Shop Section */}
-            <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div id="shop" className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white sm:text-4xl mb-4">
                         New Arrivals
@@ -204,7 +204,7 @@ const Home = () => {
             </div>
 
             {/* Need Help / About Section */}
-            <div className="bg-white dark:bg-surface-dark py-24 border-t border-gray-100 dark:border-white/5">
+            <div id="about" className="bg-white dark:bg-surface-dark py-24 border-t border-gray-100 dark:border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                         <div>
@@ -239,7 +239,7 @@ const Home = () => {
             </div>
 
             {/* Contact Section */}
-            <div className="bg-primary py-24 text-white text-center">
+            <div id="contact" className="bg-primary py-24 text-white text-center">
                 <div className="max-w-4xl mx-auto px-4">
                     <h2 className="text-3xl font-black mb-8">Get in Touch</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

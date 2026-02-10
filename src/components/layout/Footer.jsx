@@ -1,9 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
     return (
-        <footer className="bg-gray-900 text-white pt-10 pb-6">
+        <footer className="bg-gray-900 text-white pt-10 pb-6 relative z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div>
@@ -28,14 +29,14 @@ const Footer = () => {
                     <div>
                         <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
                         <ul className="space-y-2 text-sm text-gray-400">
-                            <li><a href="/" className="hover:text-primary">Home</a></li>
-                            <li><a href="/breeds" className="hover:text-primary">Fish Breeds</a></li>
-                            <li><a href="/admin" className="hover:text-primary">Admin Access</a></li>
+                            <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
+                            <li><Link to="/breeds" className="hover:text-primary transition-colors">Fish Breeds</Link></li>
+                            <li><Link to="/admin" className="hover:text-primary transition-colors">Admin Access</Link></li>
                         </ul>
                     </div>
                 </div>
                 <div className="border-t border-gray-800 mt-8 pt-6 text-center text-xs text-gray-500">
-                    &copy; {new Date().getFullYear()} Lavender Aquafarm. All rights reserved.
+                    &copy; {new Date().getFullYear()} <Link to="/admin" className="hover:text-gray-400 transition-colors">Lavender Aquafarm</Link>. All rights reserved.
                 </div>
             </div>
         </footer>
