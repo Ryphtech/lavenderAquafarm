@@ -8,13 +8,23 @@ import CartDrawer from '../components/CartDrawer';
 
 const Breeds = () => {
     const [breeds, setBreeds] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
     const { setIsCartOpen } = useCart();
 
     useEffect(() => {
-        setBreeds(breedService.getAll());
+        const fetchBreeds = async () => {
+            try {
+                const data = await breedService.getAll();
+                setBreeds(data);
+            } catch (error) {
+                console.error('Failed to fetch breeds:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBreeds();
     }, []);
+
 
     const handleCheckout = () => {
         setIsModalOpen(true);
@@ -41,7 +51,7 @@ const Breeds = () => {
                             placeholder="Search varieties / breeds..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-3 rounded-full border border-white/10 bg-surface-dark text-white w-full md:w-80 focus:ring-2 focus:ring-accent focus:outline-none shadow-sm placeholder-white/20"
+                            className="pl-10 pr-4 py-3 rounded-full border border-white/10 bg-surface-dark text-white w-full md:w-80 focus:ring-2 focus:ring-accent focus:outline-none shadow-sm placeholder-white/50"
                         />
                     </div>
                 </div>

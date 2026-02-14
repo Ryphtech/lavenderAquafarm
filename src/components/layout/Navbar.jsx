@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Droplets, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import logo from '../../assets/logo.jpg';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { cartCount, setIsCartOpen } = useCart();
+    const location = useLocation();
 
     // Handle scroll effect for glassmorphism
     useEffect(() => {
@@ -36,7 +38,7 @@ const Navbar = () => {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else if (location.pathname !== '/') {
                 // If not on home page, navigate to home then scroll
-                window.location.href = `/${link.hash}`;
+                window.location.href = `/#${link.hash}`;
             }
             setIsOpen(false);
         }
@@ -51,12 +53,10 @@ const Navbar = () => {
                     <div className="flex h-14 items-center justify-between">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-3 group">
-                            <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors shadow-glow ${scrolled
-                                ? 'bg-primary/20 text-white group-hover:bg-primary group-hover:text-white'
-                                : 'bg-white/10 text-white group-hover:bg-white/20'}`}>
-                                <Droplets size={18} fill="currentColor" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full overflow-hidden shadow-lg shadow-black/50 transition-transform group-hover:scale-110">
+                                <img src={logo} alt="Lavender Aqua Farm" className="h-full w-full object-cover" />
                             </div>
-                            <h1 className="text-lg font-extrabold tracking-tight sm:text-xl drop-shadow-sm transition-colors text-white">Lavender Aqua Farm</h1>
+                            <h1 className="text-lg font-extrabold tracking-tight sm:text-xl drop-shadow-sm transition-colors text-lavender uppercase">Lavender AquaFarm</h1>
                         </Link>
 
                         {/* Desktop Nav */}
@@ -66,40 +66,44 @@ const Navbar = () => {
                                     key={link.name}
                                     href={link.hash ? `#${link.hash}` : link.path}
                                     onClick={(e) => handleNavClick(e, link)}
-                                    className={`text-sm font-bold transition-all px-3 py-1.5 rounded-lg text-white hover:bg-white/10`}
+                                    className={`text-sm font-bold transition-all px-3 py-1.5 rounded-lg text-white hover:text-lavender`}
                                 >
                                     {link.name}
                                 </a>
                             ))}
 
-                            {/* Cart Icon */}
-                            <button
-                                onClick={() => setIsCartOpen(true)}
-                                className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition-all hover:bg-white/20 hover:scale-105"
-                            >
-                                <ShoppingCart size={20} />
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white ring-2 ring-primary shadow-lg animate-bounce-subtle">
-                                        {cartCount}
-                                    </span>
-                                )}
-                            </button>
+                            {/* Cart Icon - Hidden on Admin Page */}
+                            {location.pathname !== '/admin' && (
+                                <button
+                                    onClick={() => setIsCartOpen(true)}
+                                    className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition-all hover:bg-white/20 hover:scale-105"
+                                >
+                                    <ShoppingCart size={20} />
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white ring-2 ring-primary shadow-lg animate-bounce-subtle">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </button>
+                            )}
                         </div>
 
                         {/* Mobile Controls */}
                         <div className="flex md:hidden items-center gap-4">
-                            {/* Mobile Cart */}
-                            <button
-                                onClick={() => setIsCartOpen(true)}
-                                className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition-all"
-                            >
-                                <ShoppingCart size={20} />
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white ring-2 ring-primary">
-                                        {cartCount}
-                                    </span>
-                                )}
-                            </button>
+                            {/* Mobile Cart - Hidden on Admin Page */}
+                            {location.pathname !== '/admin' && (
+                                <button
+                                    onClick={() => setIsCartOpen(true)}
+                                    className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition-all"
+                                >
+                                    <ShoppingCart size={20} />
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white ring-2 ring-primary">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </button>
+                            )}
 
                             <button
                                 onClick={() => setIsOpen(!isOpen)}
@@ -121,7 +125,7 @@ const Navbar = () => {
                                 key={link.name}
                                 href={link.hash ? `#${link.hash}` : link.path}
                                 onClick={(e) => handleNavClick(e, link)}
-                                className="block px-4 py-3 rounded-xl text-base font-medium transition-colors text-white hover:bg-white/5"
+                                className="block px-4 py-3 rounded-xl text-base font-medium transition-colors text-white hover:text-lavender hover:bg-white/5"
                             >
                                 {link.name}
                             </a>

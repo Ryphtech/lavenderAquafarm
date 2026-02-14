@@ -87,22 +87,22 @@ const CartDrawer = ({ onCheckout }) => {
                                                 <div>
                                                     <div className="flex justify-between text-base font-bold text-white">
                                                         <h3 className="line-clamp-1">{item.name}</h3>
-                                                        <p className="ml-4 text-accent">${(item.price * item.quantity).toFixed(2)}</p>
+                                                        <p className="ml-4 text-accent">₹{item.price * item.quantity}</p>
                                                     </div>
                                                     <p className="mt-1 text-xs text-white/50">{item.gender} • {item.grade}</p>
                                                 </div>
                                                 <div className="flex flex-1 items-end justify-between text-sm">
-                                                    <div className="flex items-center space-x-1 border border-white/10 rounded-lg bg-black/20 px-1 py-0.5">
+                                                    <div className="flex items-center space-x-3 border border-white/10 rounded-xl bg-black/20 px-2 py-1">
                                                         <button
                                                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                            className="p-1 text-white/50 hover:text-white transition-colors"
+                                                            className="p-1.5 text-white/50 hover:text-white transition-colors"
                                                         >
                                                             -
                                                         </button>
-                                                        <span className="w-8 text-center text-white font-medium">{item.quantity}</span>
+                                                        <span className="w-8 text-center text-white font-bold">{item.quantity}</span>
                                                         <button
                                                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                            className="p-1 text-white/50 hover:text-white transition-colors"
+                                                            className="p-1.5 text-white/50 hover:text-white transition-colors"
                                                         >
                                                             +
                                                         </button>
@@ -129,12 +129,12 @@ const CartDrawer = ({ onCheckout }) => {
                             <div className="border-t border-white/10 bg-white/5 p-6 backdrop-blur-md">
                                 <div className="flex justify-between text-base font-bold text-white mb-4">
                                     <p>Subtotal</p>
-                                    <p className="text-xl text-accent font-black">${cartTotal.toFixed(2)}</p>
+                                    <p className="text-xl text-accent font-black">₹{cartTotal}</p>
                                 </div>
                                 <p className="mb-6 text-xs text-white/50">Shipping and taxes calculated at checkout.</p>
                                 <button
                                     onClick={onCheckout}
-                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-bold text-white shadow-xl shadow-accent/20 transition-all hover:scale-[1.02] hover:bg-amber-700"
+                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-bold text-white shadow-xl shadow-accent/20 transition-all hover:scale-[1.02] hover:bg-purple-700"
                                 >
                                     Proceed to Checkout
                                     <ChevronRight size={20} />

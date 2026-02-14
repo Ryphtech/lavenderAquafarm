@@ -76,7 +76,7 @@ const BreedManager = () => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface-dark rounded-2xl shadow-sm border border-white/5 p-6 text-white">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">Manage Breeds</h2>
                 <button
@@ -89,27 +89,27 @@ const BreedManager = () => {
 
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-white/5">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Breed</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-white/50 uppercase tracking-wider">Breed</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-white/50 uppercase tracking-wider">Availability</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-white/50 uppercase tracking-wider">Price</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-white/50 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-3 text-right text-xs font-semibold text-white/50 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-transparent divide-y divide-white/5">
                         {breeds.map((breed) => (
                             <tr key={breed.id}>
                                 <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                                    <img src={breed.images[0]} alt="" className="h-10 w-10 rounded-full mr-3 object-cover" />
-                                    <div className="text-sm font-medium text-gray-900">{breed.name}</div>
+                                    <img src={breed.images[0]} alt="" className="h-10 w-10 rounded-full mr-3 object-cover border border-white/10" />
+                                    <div className="text-sm font-bold text-white">{breed.name}</div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    M: {breed.male_avail ? <span className="text-green-600">Yes</span> : <span className="text-red-500">No</span>},
-                                    F: {breed.female_avail ? <span className="text-green-600">Yes</span> : <span className="text-red-500">No</span>}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
+                                    M: {breed.male_avail ? <span className="text-green-400">Yes</span> : <span className="text-red-400">No</span>},
+                                    F: {breed.female_avail ? <span className="text-green-400">Yes</span> : <span className="text-red-400">No</span>}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{breed.price_pair}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-accent">₹{breed.price_pair}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <button
                                         onClick={() => toggleStatus(breed)}
@@ -131,8 +131,8 @@ const BreedManager = () => {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <div className="bg-surface-dark border border-white/10 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-bold">{currentBreed ? 'Edit Breed' : 'Add New Breed'}</h3>
                             <button onClick={() => setIsModalOpen(false)}><X /></button>
@@ -142,14 +142,14 @@ const BreedManager = () => {
                                 placeholder="Name"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                className="w-full border p-2 rounded"
+                                className="w-full border border-white/10 bg-black/20 p-3 rounded-xl text-white placeholder-white/50 focus:border-accent transition-all"
                                 required
                             />
                             <textarea
                                 placeholder="Description"
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                className="w-full border p-2 rounded"
+                                className="w-full border border-white/10 bg-black/20 p-3 rounded-xl text-white placeholder-white/50 focus:border-accent transition-all resize-none"
                                 required
                             />
                             <div className="grid grid-cols-2 gap-4">
@@ -157,14 +157,14 @@ const BreedManager = () => {
                                     placeholder="Quality (e.g. show grade)"
                                     value={formData.quality}
                                     onChange={e => setFormData({ ...formData, quality: e.target.value })}
-                                    className="w-full border p-2 rounded"
+                                    className="w-full border border-white/10 bg-black/20 p-3 rounded-xl text-white placeholder-white/50 focus:border-accent transition-all"
                                 />
                                 <input
                                     type="number"
                                     placeholder="Price per Pair"
                                     value={formData.price_pair}
                                     onChange={e => setFormData({ ...formData, price_pair: e.target.value })}
-                                    className="w-full border p-2 rounded"
+                                    className="w-full border border-white/10 bg-black/20 p-3 rounded-xl text-white placeholder-white/50 focus:border-accent transition-all"
                                     required
                                 />
                             </div>
@@ -172,7 +172,7 @@ const BreedManager = () => {
                                 placeholder="Image URL"
                                 value={formData.images}
                                 onChange={e => setFormData({ ...formData, images: e.target.value })}
-                                className="w-full border p-2 rounded"
+                                className="w-full border border-white/10 bg-black/20 p-3 rounded-xl text-white placeholder-white/50 focus:border-accent transition-all"
                                 required
                             />
                             <div className="flex space-x-4">

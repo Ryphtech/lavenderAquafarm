@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { X, MessageCircle, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { orderService } from '../services/mockData';
 
 const OrderModal = ({ isOpen, onClose }) => {
     const { cartItems, cartTotal, clearCart } = useCart();
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
+        phone2: '',
         address: '',
+        district: '',
+        state: '',
         pincode: ''
     });
 
@@ -17,29 +21,69 @@ const OrderModal = ({ isOpen, onClose }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Construct multi-item WhatsApp message
-        const itemsList = cartItems.map(item =>
-            `- ${item.name} (${item.quantity} x $${item.price.toFixed(2)})`
-        ).join('\n');
+        // Create Order Object
+        const newOrder = {
+            customer_name: formData.name,
+            phone: formData.phone,
+            phone2: formData.phone2,
+            address: formData.address,
+            district: formData.district,
+            state: formData.state,
+            pincode: formData.pincode,
+            items: cartItems.map(item => ({
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            total_amount: cartTotal,
+            status: 'Waiting for Confirmation'
+        };
 
-        const message = `*New Order from Lavender Aqua Farm*\n\n` +
-            `*Customer Details:*\n` +
-            `Name: ${formData.name}\n` +
-            `Phone: ${formData.phone}\n` +
-            `Address: ${formData.address}, ${formData.pincode}\n\n` +
-            `*Order Items:*\n${itemsList}\n\n` +
-            `*Total Amount: $${cartTotal.toFixed(2)}*`;
+        try {
+            // Save to Supabase
+            const savedOrder = await orderService.create(newOrder);
 
-        const whatsappUrl = `https://wa.me/917736681820?text=${encodeURIComponent(message)}`;
+            // Construct multi-item WhatsApp message
+            const itemsList = cartItems.map(item =>
+                `- ${item.name} (${item.quantity} x ₹${item.price})`
+            ).join('\n');
 
-        // Redirect to WhatsApp
-        window.open(whatsappUrl, '_blank');
-        clearCart();
-        onClose();
+            const message = `*New Order from Lavender Aqua Farm*\n\n` +
+                `*Order ID:* ${savedOrder.id}\n` +
+                `*Customer Details:*\n` +
+                `Name: ${formData.name}\n` +
+                `Mobile 1: ${formData.phone}\n` +
+                `Mobile 2: ${formData.phone2}\n` +
+                `Address: ${formData.address}\n` +
+                `District: ${formData.district}\n` +
+                `State: ${formData.state}\n` +
+                `Pincode: ${formData.pincode}\n\n` +
+                `*Order Items:*\n${itemsList}\n\n` +
+                `*Total Amount: ₹${cartTotal}*`;
+
+            const whatsappUrl = `https://wa.me/917736681820?text=${encodeURIComponent(message)}`;
+
+            // Redirect to WhatsApp
+            window.open(whatsappUrl, '_blank');
+            clearCart();
+            onClose();
+        } catch (error) {
+            console.error('Failed to create order:', error);
+            console.error('Error details:', {
+                message: error.message,
+                code: error.code,
+                details: error.details,
+                hint: error.hint
+            });
+            const errorMessage = error.message || 'Failed to place order. Please try again.';
+            alert(`Error: ${errorMessage}\n\nPlease contact support if this persists.`);
+        }
     };
+
 
     return (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
@@ -50,8 +94,8 @@ const OrderModal = ({ isOpen, onClose }) => {
             ></div>
 
             {/* Modal */}
-            <div className="relative w-full max-w-lg transform overflow-hidden rounded-3xl bg-surface-dark p-8 text-left align-middle shadow-2xl transition-all border border-white/10">
-                <div className="flex items-center justify-between mb-6">
+            <div className="relative w-full max-w-lg transform rounded-3xl bg-surface-dark p-6 sm:p-8 text-left align-middle shadow-2xl transition-all border border-white/10 max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                <div className="flex items-center justify-between mb-6 sticky top-0 bg-surface-dark/95 backdrop-blur-sm z-10 py-2 -mt-2">
                     <div>
                         <h3 className="text-2xl font-black text-white">
                             Checkout
@@ -80,11 +124,11 @@ const OrderModal = ({ isOpen, onClose }) => {
                                 <div className="flex-1">
                                     <h4 className="font-bold text-white text-sm">{item.name}</h4>
                                     <div className="text-xs text-white/50">
-                                        {item.quantity} x ${item.price.toFixed(2)}
+                                        {item.quantity} x ₹{item.price}
                                     </div>
                                 </div>
                                 <div className="text-sm font-bold text-white">
-                                    ${(item.price * item.quantity).toFixed(2)}
+                                    ₹{item.price * item.quantity}
                                 </div>
                             </div>
                         ))}
@@ -93,33 +137,44 @@ const OrderModal = ({ isOpen, onClose }) => {
 
                 <div className="flex items-center justify-between mb-8 px-2">
                     <span className="text-white/50 font-bold">Total Amount</span>
-                    <span className="text-3xl font-black text-accent">${cartTotal.toFixed(2)}</span>
+                    <span className="text-3xl font-black text-accent">₹{cartTotal}</span>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">Full Name</label>
                             <input
                                 type="text"
                                 name="name"
                                 required
-                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/10 transition-all"
+                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/50 transition-all"
                                 value={formData.name}
                                 onChange={handleChange}
                                 placeholder="John Doe"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">Phone Number</label>
+                            <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">Mobile No 1</label>
                             <input
                                 type="tel"
                                 name="phone"
                                 required
-                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/10 transition-all"
+                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/50 transition-all"
                                 value={formData.phone}
                                 onChange={handleChange}
                                 placeholder="Enter phone"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">Mobile No 2</label>
+                            <input
+                                type="tel"
+                                name="phone2"
+                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/50 transition-all"
+                                value={formData.phone2}
+                                onChange={handleChange}
+                                placeholder="Alternative phone"
                             />
                         </div>
                     </div>
@@ -129,23 +184,49 @@ const OrderModal = ({ isOpen, onClose }) => {
                             name="address"
                             required
                             rows="2"
-                            className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/10 transition-all resize-none"
+                            className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/50 transition-all resize-none"
                             value={formData.address}
                             onChange={handleChange}
                             placeholder="House No, Street, City, State"
                         ></textarea>
                     </div>
-                    <div>
-                        <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">Pincode</label>
-                        <input
-                            type="text"
-                            name="pincode"
-                            required
-                            className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/10 transition-all"
-                            value={formData.pincode}
-                            onChange={handleChange}
-                            placeholder="682001"
-                        />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">District</label>
+                            <input
+                                type="text"
+                                name="district"
+                                required
+                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/50 transition-all"
+                                value={formData.district}
+                                onChange={handleChange}
+                                placeholder="District"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">State</label>
+                            <input
+                                type="text"
+                                name="state"
+                                required
+                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/50 transition-all"
+                                value={formData.state}
+                                onChange={handleChange}
+                                placeholder="State"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-2 ml-1">Pincode</label>
+                            <input
+                                type="text"
+                                name="pincode"
+                                required
+                                className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-accent focus:ring-1 focus:ring-accent sm:text-sm placeholder-white/50 transition-all"
+                                value={formData.pincode}
+                                onChange={handleChange}
+                                placeholder="682001"
+                            />
+                        </div>
                     </div>
 
                     <button

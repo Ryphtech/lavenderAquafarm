@@ -45,7 +45,7 @@ const BreedCard = ({ breed }) => {
                         setIsCartOpen(true);
                     }}
                     disabled={breed.status !== 'available'}
-                    className="w-full py-3 px-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center space-x-2 hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed group-hover:shadow-lg shadow-md"
+                    className="w-full py-3 px-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center space-x-2 hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-xl hover:-translate-y-0.5"
                 >
                     <ShoppingBag size={18} />
                     <span>Add to Cart</span>

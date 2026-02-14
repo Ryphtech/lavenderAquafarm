@@ -6,8 +6,9 @@ const OrderDashboard = () => {
     const [orders, setOrders] = useState([]);
     const [expandedOrderId, setExpandedOrderId] = useState(null);
 
-    const refreshOrders = () => {
-        setOrders(orderService.getAll());
+    const refreshOrders = async () => {
+        const data = await orderService.getAll();
+        setOrders(data);
     };
 
     useEffect(() => {
@@ -27,9 +28,9 @@ const OrderDashboard = () => {
         setExpandedOrderId(expandedOrderId === id ? null : id);
     };
 
-    const toggleShipped = (e, order) => {
+    const toggleShipped = async (e, order) => {
         e.stopPropagation();
-        orderService.update(order.id, { shipped: !order.shipped });
+        await orderService.update(order.id, { shipped: !order.shipped });
         refreshOrders();
     };
 
@@ -60,7 +61,7 @@ const OrderDashboard = () => {
                                 <React.Fragment key={order.id}>
                                     <tr
                                         onClick={() => toggleExpansion(order.id)}
-                                        className={`cursor-pointer transition-colors ${expandedOrderId === order.id ? 'bg-indigo-50 hover:bg-indigo-100' : 'hover:bg-gray-50'
+                                        className={`cursor-pointer transition-colors ${expandedOrderId === order.id ? 'bg-purple-50/50 hover:bg-purple-100/10' : 'hover:bg-white/5'
                                             }`}
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center gap-2">
@@ -68,21 +69,22 @@ const OrderDashboard = () => {
                                             #{order.id}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div>{order.customerName}</div>
+                                            <div>{order.customer_name}</div>
                                             <div className="text-xs">{order.phone}</div>
+                                            {order.phone2 && <div className="text-xs">{order.phone2}</div>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {order.items.map((item, idx) => (
-                                                <div key={idx}>{item.breedName} x{item.quantity}</div>
+                                                <div key={idx}>{item.name || item.breedName} x{item.quantity}</div>
                                             ))}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${order.shipped ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${order.shipped ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'
                                                 }`}>
                                                 {order.shipped ? 'Shipped' : 'Pending'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">₹{order.totalAmount}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">₹{order.total_amount || order.totalAmount}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <button
                                                 onClick={(e) => openWhatsApp(e, order)}
@@ -102,12 +104,15 @@ const OrderDashboard = () => {
                                                         <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
                                                             <MapPin size={14} className="mr-1" /> Shipping Address
                                                         </h4>
-                                                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                                                            <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{order.address}</p>
+                                                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-2">
+                                                            <p className="text-gray-800 leading-relaxed">{order.address}</p>
+                                                            {order.district && <p className="text-sm text-gray-600"><span className="font-semibold">District:</span> {order.district}</p>}
+                                                            {order.state && <p className="text-sm text-gray-600"><span className="font-semibold">State:</span> {order.state}</p>}
+                                                            {order.pincode && <p className="text-sm text-gray-600"><span className="font-semibold">Pincode:</span> {order.pincode}</p>}
                                                         </div>
                                                         <div className="mt-3 text-xs text-gray-500 flex items-center">
                                                             <Calendar size={14} className="mr-1" />
-                                                            Ordered on: {order.date ? new Date(order.date).toLocaleString() : 'N/A'}
+                                                            Ordered on: {order.created_at ? new Date(order.created_at).toLocaleString() : (order.date ? new Date(order.date).toLocaleString() : 'N/A')}
                                                         </div>
                                                     </div>
 
@@ -121,8 +126,8 @@ const OrderDashboard = () => {
                                                             className={`
                                                                 flex items-center space-x-4 p-4 rounded-xl border-2 cursor-pointer transition-all group
                                                                 ${order.shipped
-                                                                    ? 'border-green-500 bg-green-50'
-                                                                    : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-gray-50'
+                                                                    ? 'border-green-500 bg-green-50/10'
+                                                                    : 'border-white/10 bg-black/20 hover:border-accent/30 hover:bg-white/5'
                                                                 }
                                                             `}
                                                         >

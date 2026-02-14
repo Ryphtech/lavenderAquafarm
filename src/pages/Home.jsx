@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { initialBreeds } from '../data/mockData';
 import ProductCard from '../components/ProductCard';
 import OrderModal from '../components/OrderModal';
 import { Trophy, Users, Heart, Sprout, MapPin, Phone, Mail, Check, Search, ShoppingBag } from 'lucide-react';
@@ -10,20 +9,41 @@ import heroImg2 from '../assets/hero-carousal2.jpeg';
 import heroImg3 from '../assets/hero-carousal3.jpeg';
 import heroImg4 from '../assets/hero-carousal4.jpeg';
 import heroImg5 from '../assets/hero-carousal5.jpeg';
+import mobileHeroImg1 from '../assets/hero-mobileCarousal1.jpeg';
+import mobileHeroImg2 from '../assets/hero-mobileCarousal2.jpeg';
+import mobileHeroImg3 from '../assets/hero-mobileCarousal3.jpeg';
+import mobileHeroImg4 from '../assets/hero-mobileCarousal4.jpeg';
+import mobileHeroImg5 from '../assets/hero-mobileCarousal5.jpeg';
 import selectiveBreedingImg from '../assets/selectiveBreeding.jpg';
 import qualityCheckImg from '../assets/qualityCheck.webp';
 import optimalGrowthImg from '../assets/optimalGrowth.png';
+import logo from '../assets/logo.jpg';
+import { breedService } from '../services/mockData';
 
 const Home = () => {
-    const [products] = useState(initialBreeds);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All');
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentBg, setCurrentBg] = useState(0);
 
     const bgImages = [heroImg1, heroImg2, heroImg3, heroImg4, heroImg5];
+    const mobileBgImages = [mobileHeroImg1, mobileHeroImg2, mobileHeroImg3, mobileHeroImg4, mobileHeroImg5];
 
     useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await breedService.getAll();
+                setProducts(data);
+            } catch (error) {
+                console.error('Failed to fetch products:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+
         const timer = setInterval(() => {
             setCurrentBg((prev) => (prev + 1) % bgImages.length);
         }, 1500);
@@ -42,7 +62,7 @@ const Home = () => {
     const filteredProducts = products.filter(product => {
         const matchesFilter =
             filter === 'All' ||
-            (filter === 'In Stock' && product.inStock) ||
+            (filter === 'In Stock' && product.in_stock) ||
             (filter === 'Top Quality' && product.quality === 'Top Quality') ||
             (filter === 'Pairs' && product.gender === 'Pair') ||
             (filter === 'Females Only' && product.gender === 'Female');
@@ -55,6 +75,7 @@ const Home = () => {
         return matchesFilter && matchesSearch;
     });
 
+
     return (
         <div className="pb-12">
             {/* Hero Section Wrapper */}
@@ -62,13 +83,26 @@ const Home = () => {
                 <div className="relative min-h-[90vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden rounded-b-[3rem] md:rounded-[2.5rem] bg-gray-900 shadow-2xl ring-1 ring-white/10">
                     {/* Background Slider */}
                     <div className="absolute inset-0">
-                        {bgImages.map((img, index) => (
-                            <div
-                                key={index}
-                                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out brightness-[0.6] ${currentBg === index ? 'opacity-100' : 'opacity-0'}`}
-                                style={{ backgroundImage: `url('${img}')` }}
-                            ></div>
-                        ))}
+                        {/* Desktop Images */}
+                        <div className="hidden md:block absolute inset-0">
+                            {bgImages.map((img, index) => (
+                                <div
+                                    key={`desktop-${index}`}
+                                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out brightness-[0.6] ${currentBg === index ? 'opacity-100' : 'opacity-0'}`}
+                                    style={{ backgroundImage: `url('${img}')` }}
+                                ></div>
+                            ))}
+                        </div>
+                        {/* Mobile Images */}
+                        <div className="block md:hidden absolute inset-0">
+                            {mobileBgImages.map((img, index) => (
+                                <div
+                                    key={`mobile-${index}`}
+                                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out brightness-[0.6] ${currentBg === index ? 'opacity-100' : 'opacity-0'}`}
+                                    style={{ backgroundImage: `url('${img}')` }}
+                                ></div>
+                            ))}
+                        </div>
                         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90"></div>
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
                     </div>
@@ -79,13 +113,13 @@ const Home = () => {
                         </span>
                         <h2 className="text-5xl font-black tracking-tight text-white sm:text-7xl lg:text-8xl mb-8 drop-shadow-2xl animate-fade-in-up delay-100">
                             Experience the <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200">Vibrant Life</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-lavender to-purple-400">Vibrant Life</span>
                         </h2>
                         <p className="mx-auto max-w-2xl text-xl text-white mb-12 font-medium leading-relaxed drop-shadow-md animate-fade-in-up delay-200">
                             We breed the finest quality guppies with improved genetics, vibrant colors, and healthy lineages. Elevate your aquarium today.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
-                            <a href="#shop" className="inline-flex items-center justify-center rounded-2xl bg-accent px-8 py-4 text-lg font-bold text-white shadow-lg shadow-accent/30 transition-all hover:scale-105 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-black">
+                            <a href="#shop" className="inline-flex items-center justify-center rounded-2xl bg-accent px-8 py-4 text-lg font-bold text-white shadow-lg shadow-accent/30 transition-all hover:scale-105 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-black">
                                 Shop Collection
                             </a>
                             <a href="#story" className="inline-flex items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:scale-105 hover:bg-white/20 focus:outline-none">
@@ -166,7 +200,7 @@ const Home = () => {
                                         <p className="text-white text-sm leading-relaxed">Our fry are raised in spacious tanks with live plants and high-quality nutrition to promote rapid and healthy growth.</p>
                                     </div>
                                 </div>
-                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-amber-500 border-4 border-slate-900 hidden md:block z-10"></div>
+                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-purple-500 border-4 border-slate-900 hidden md:block z-10"></div>
                                 <div className="md:w-[45%]"></div>
                             </div>
 
@@ -183,7 +217,7 @@ const Home = () => {
                                         <p className="text-white text-sm leading-relaxed">Before listing, every fish undergoes a rigorous health and quality inspection. Only the best make it to our shop.</p>
                                     </div>
                                 </div>
-                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-yellow-600 border-4 border-slate-900 hidden md:block z-10"></div>
+                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-purple-600 border-4 border-slate-900 hidden md:block z-10"></div>
                                 <div className="md:w-[45%]"></div>
                             </div>
                         </div>
@@ -224,10 +258,10 @@ const Home = () => {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search varieties / breeds..."
+                                placeholder="Search for your favorite guppy varieties..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 rounded-xl border border-white/10 bg-surface-dark text-white focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-white/30"
+                                className="block w-full rounded-2xl border-white/10 bg-white/5 py-4 pl-12 pr-4 text-white placeholder-white/50 backdrop-blur-sm transition-all focus:border-accent focus:ring-accent sm:text-sm"
                             />
                         </div>
                     </div>
@@ -279,13 +313,15 @@ const Home = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-primary/20 rounded-3xl rotate-3"></div>
-                            <img
-                                src="https://images.unsplash.com/photo-1535591273668-578e31182c4f?q=80&w=2070&auto=format&fit=crop"
-                                alt="Farm owner checking tanks"
-                                className="relative rounded-3xl shadow-2xl rotate-[-2deg] hover:rotate-0 transition-all duration-500"
-                            />
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-primary/20 rounded-full rotate-3 transition-transform group-hover:rotate-0 duration-500"></div>
+                            <div className="relative aspect-square max-w-sm mx-auto overflow-hidden rounded-full shadow-2xl shadow-black/50 rotate-[-2deg] hover:rotate-0 transition-all duration-500">
+                                <img
+                                    src={logo}
+                                    alt="Lavender Aqua Farm Logo"
+                                    className="h-full w-full object-cover"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -294,23 +330,47 @@ const Home = () => {
             {/* Contact Section */}
             <div id="contact" className="bg-background-dark py-24 relative overflow-hidden">
                 <div className="absolute inset-0 bg-accent/5 pointer-events-none"></div>
-                <div className="max-w-4xl mx-auto px-4 relative z-10">
+                <div className="max-w-7xl mx-auto px-4 relative z-10">
                     <h2 className="text-3xl font-black text-white mb-12 text-center">Get in Touch</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center">
-                            <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Phone size={32} /></div>
-                            <h3 className="text-xl font-bold mb-2 text-white">WhatsApp Support</h3>
-                            <p className="text-white">+91 77366 81820</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                        {/* Contact Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center sm:col-span-2 lg:col-span-1">
+                                <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Phone size={32} /></div>
+                                <h3 className="text-xl font-bold mb-2 text-white">WhatsApp Support</h3>
+                                <p className="text-white">+91 77366 81820</p>
+                            </div>
+                            <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center sm:col-span-1 lg:col-span-1">
+                                <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Mail size={32} /></div>
+                                <h3 className="text-xl font-bold mb-2 text-white">Email Us</h3>
+                                <p className="text-white">contact@lavenderaqua.com</p>
+                            </div>
+                            <a
+                                href="https://wa.me/917736681820?text=Hi%2C%20I%20would%20like%20to%20request%20a%20visit%20to%20Lavender%20Aqua%20Farm."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center sm:col-span-1 lg:col-span-2 block"
+                            >
+                                <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><MapPin size={32} /></div>
+                                <h3 className="text-xl font-bold mb-2 text-white">Request Farm Visit</h3>
+                                <div className="mt-4 inline-flex items-center justify-center rounded-xl bg-accent/20 px-4 py-2 text-sm font-bold text-accent group-hover:bg-accent group-hover:text-white transition-all">
+                                    Book Appointment
+                                </div>
+                            </a>
                         </div>
-                        <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center">
-                            <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Mail size={32} /></div>
-                            <h3 className="text-xl font-bold mb-2 text-white">Email Us</h3>
-                            <p className="text-white">contact@lavenderaqua.com</p>
-                        </div>
-                        <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center">
-                            <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><MapPin size={32} /></div>
-                            <h3 className="text-xl font-bold mb-2 text-white">Visit Farm</h3>
-                            <p className="text-white">Kochi, Kerala, India</p>
+
+                        {/* Map */}
+                        <div className="w-full h-[400px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d252543.61714730656!2d76.75946589270501!3d8.499960440586324!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b05bbb805bbcd47%3A0x15439fab5c5c81cb!2sThiruvananthapuram%2C%20Kerala!5e0!3m2!1sen!2sin!4v1771055409406!5m2!1sen!2sin"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                allowFullScreen=""
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                className="grayscale hover:grayscale-0 transition-all duration-500"
+                            ></iframe>
                         </div>
                     </div>
                 </div>
