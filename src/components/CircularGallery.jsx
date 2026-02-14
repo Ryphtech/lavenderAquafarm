@@ -1,4 +1,4 @@
-import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
+import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform, Raycast, Vec2 } from 'ogl';
 import { useEffect, useRef } from 'react';
 
 function debounce(func, wait) {
@@ -207,7 +207,52 @@ class Media {
             geometry: this.geometry,
             program: this.program
         });
+        this.plane.mediaIndex = this.index;
         this.plane.setParent(this.scene);
+    }
+    // ...
+    onTouchUp(e) {
+        this.isDown = false;
+
+        // Check for click
+        const x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+        const y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+        const dist = Math.hypot(x - this.clickStart.x, y - this.clickStart.y);
+
+        if (dist < 10 && this.onItemClick) {
+            const rect = this.container.getBoundingClientRect();
+            this.mouse.set(
+                2.0 * ((x - rect.left) / this.screen.width) - 1.0,
+                2.0 * (1.0 - (y - rect.top) / this.screen.height) - 1.0
+            );
+
+            this.raycast.castMouse(this.camera, this.mouse);
+
+            const meshes = this.medias.map(m => m.plane);
+            const hits = this.raycast.intersectBounds(meshes);
+
+            if (hits && hits.length) {
+                // hits[0] is the Mesh with added properties
+                const hitMesh = hits[0];
+                console.log('Hit Result:', hitMesh);
+                console.log('Hit Mesh mediaIndex:', hitMesh.mediaIndex);
+                console.log('Is Mesh instance?', hitMesh instanceof Mesh);
+
+                let current = hitMesh;
+                while (current && current.mediaIndex === undefined && current.parent) {
+                    current = current.parent;
+                }
+
+                if (current && current.mediaIndex !== undefined) {
+                    const itemIndex = current.mediaIndex % this.items.length;
+                    this.onItemClick(this.items[itemIndex]);
+                } else {
+                    console.error('CRITICAL: Mesh hit but mediaIndex missing! Mesh:', hitMesh);
+                }
+            }
+        }
+
+        this.onCheck();
     }
     createTitle() {
         this.title = new Title({
@@ -290,12 +335,15 @@ class App {
             font = 'bold 30px Figtree',
             scrollSpeed = 2,
             scrollEase = 0.05,
-            autoScroll = true
+            autoScroll = true,
+            onItemClick
         } = {}
     ) {
         document.documentElement.classList.remove('no-js');
         this.container = container;
         this.scrollSpeed = scrollSpeed;
+        this.items = items;
+        this.onItemClick = onItemClick;
         this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
         this.onCheckDebounce = debounce(this.onCheck, 200);
         this.createRenderer();
@@ -306,6 +354,9 @@ class App {
         this.createMedias(items, bend, textColor, borderRadius, font);
         this.update();
         this.addEventListeners();
+
+        this.mouse = new Vec2();
+        this.raycast = new Raycast(this.gl);
 
         if (autoScroll) {
             this.initAutoScroll();
@@ -384,6 +435,10 @@ class App {
         this.isDown = true;
         this.scroll.position = this.scroll.current;
         this.start = e.touches ? e.touches[0].clientX : e.clientX;
+        this.clickStart = {
+            x: e.touches ? e.touches[0].clientX : e.clientX,
+            y: e.touches ? e.touches[0].clientY : e.clientY
+        };
     }
     onTouchMove(e) {
         if (!this.isDown) return;
@@ -391,8 +446,50 @@ class App {
         const distance = (this.start - x) * (this.scrollSpeed * 0.025);
         this.scroll.target = this.scroll.position + distance;
     }
-    onTouchUp() {
+    onTouchUp(e) {
         this.isDown = false;
+
+        // Check for click
+        const x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+        const y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+        const dist = Math.hypot(x - this.clickStart.x, y - this.clickStart.y);
+
+        if (dist < 10 && this.onItemClick) {
+            const rect = this.container.getBoundingClientRect();
+            this.mouse.set(
+                2.0 * ((x - rect.left) / this.screen.width) - 1.0,
+                2.0 * (1.0 - (y - rect.top) / this.screen.height) - 1.0
+            );
+
+            this.raycast.castMouse(this.camera, this.mouse);
+
+            const meshes = this.medias.map(m => m.plane);
+            const hits = this.raycast.intersectBounds(meshes);
+
+            if (hits && hits.length) {
+                const hitResult = hits[0];
+
+                // OGL's intersectBounds returns the Mesh itself. 
+                // However, the Mesh might have a 'hit' property populated with intersection details.
+                // We want the Mesh itself.
+                let target = hitResult;
+                if (!(target instanceof Mesh) && target.hit instanceof Mesh) {
+                    target = target.hit;
+                }
+
+                // Traverse up to find mesh with mediaIndex in case we hit a child
+                let current = target;
+                while (current && current.mediaIndex === undefined && current.parent) {
+                    current = current.parent;
+                }
+
+                if (current && current.mediaIndex !== undefined) {
+                    const itemIndex = current.mediaIndex % this.items.length;
+                    this.onItemClick(this.items[itemIndex]);
+                }
+            }
+        }
+
         this.onCheck();
     }
     onWheel(e) {
@@ -478,11 +575,12 @@ export default function CircularGallery({
     font = 'bold 30px Figtree',
     scrollSpeed = 2,
     scrollEase = 0.05,
-    autoScroll = true
+    autoScroll = true,
+    onItemClick
 }) {
     const containerRef = useRef(null);
     useEffect(() => {
-        const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, autoScroll });
+        const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, autoScroll, onItemClick });
         return () => {
             app.destroy();
         };

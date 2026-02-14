@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import OrderModal from '../components/OrderModal';
 import { Trophy, Users, Heart, Sprout, MapPin, Phone, Mail, Check, Search, ShoppingBag } from 'lucide-react';
@@ -23,6 +24,7 @@ import { breedService } from '../services/mockData';
 import BlurText from '../components/BlurText';
 
 const Home = () => {
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All');
@@ -36,7 +38,7 @@ const Home = () => {
     const galleryItems = useMemo(() => {
         return products
             .filter(p => p.quality === 'Top Quality')
-            .map(p => ({ image: p.image, text: p.name }));
+            .map(p => ({ image: p.image, text: p.name, id: p.id }));
     }, [products]);
 
     useEffect(() => {
@@ -260,6 +262,7 @@ const Home = () => {
                     textColor="#ffffff"
                     borderRadius={0.05}
                     font="bold 30px Manrope"
+                    onItemClick={(item) => navigate(`/product/${item.id}`)}
                 />
             </div>
 
