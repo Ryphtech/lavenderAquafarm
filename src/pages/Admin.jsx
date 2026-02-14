@@ -15,8 +15,8 @@ const Admin = ({ onLogout }) => {
     const [breeds, setBreeds] = useState([]);
     const [showBreedModal, setShowBreedModal] = useState(false);
     const [currentBreed, setCurrentBreed] = useState(null);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [previewImages, setPreviewImages] = useState([]);
     const [uploading, setUploading] = useState(false);
 
 
@@ -80,27 +80,39 @@ const Admin = ({ onLogout }) => {
         e.preventDefault();
         setUploading(true);
         const formData = new FormData(e.target);
-        let imageUrl = formData.get('image');
 
         try {
-            // Upload Image if selected
-            if (selectedFile) {
-                const fileExt = selectedFile.name.split('.').pop();
-                const fileName = `${Math.random()}.${fileExt}`;
-                const filePath = `${fileName}`;
+            let uploadedUrls = [];
 
-                const { error: uploadError } = await supabase.storage
-                    .from('breeds')
-                    .upload(filePath, selectedFile);
+            // 1. Upload new files
+            if (selectedFiles.length > 0) {
+                const uploadPromises = selectedFiles.map(async (file) => {
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Math.random()}.${fileExt}`;
+                    const filePath = `${fileName}`;
 
-                if (uploadError) throw uploadError;
+                    const { error: uploadError } = await supabase.storage
+                        .from('breeds')
+                        .upload(filePath, file);
 
-                const { data: { publicUrl } } = supabase.storage
-                    .from('breeds')
-                    .getPublicUrl(filePath);
+                    if (uploadError) throw uploadError;
 
-                imageUrl = publicUrl;
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('breeds')
+                        .getPublicUrl(filePath);
+
+                    return publicUrl;
+                });
+
+                uploadedUrls = await Promise.all(uploadPromises);
             }
+
+            // 2. Combine with existing images (if we are editing and want to keep them)
+            const existingUrls = previewImages.filter(url => typeof url === 'string' && url.startsWith('http'));
+            const finalImages = [...existingUrls, ...uploadedUrls];
+
+            // 3. Determine main image (first one)
+            const mainImage = finalImages.length > 0 ? finalImages[0] : null;
 
             const breedData = {
                 name: formData.get('name'),
@@ -108,21 +120,45 @@ const Admin = ({ onLogout }) => {
                 quality: formData.get('quality'),
                 gender: formData.get('gender'),
                 grade: formData.get('grade'),
-                image: imageUrl,
+                image: mainImage, // Backward compatibility
+                images: finalImages, // New multiple images support
                 in_stock: formData.get('inStock') === 'on'
             };
 
             if (currentBreed) {
-                await breedService.update(currentBreed.id, breedData);
+                try {
+                    await breedService.update(currentBreed.id, breedData);
+                } catch (updateError) {
+                    if (updateError.message && updateError.message.includes('images')) {
+                        console.warn("Images column missing, falling back to single image");
+                        const { images, ...fallbackData } = breedData;
+                        await breedService.update(currentBreed.id, fallbackData);
+                        alert("Note: Multiple images were not saved because the 'images' column is missing in your database. Only the main image was saved.\n\nPlease run the SQL command provided to enable multiple images.");
+                    } else {
+                        throw updateError;
+                    }
+                }
                 setBreeds(prev => prev.map(b => b.id === currentBreed.id ? { ...b, ...breedData } : b));
             } else {
-                const newBreed = await breedService.add(breedData);
-                setBreeds(prev => [...prev, newBreed]);
+                try {
+                    const newBreed = await breedService.add(breedData);
+                    setBreeds(prev => [...prev, newBreed]);
+                } catch (addError) {
+                    if (addError.message && addError.message.includes('images')) {
+                        console.warn("Images column missing, falling back to single image");
+                        const { images, ...fallbackData } = breedData;
+                        const newBreed = await breedService.add(fallbackData);
+                        setBreeds(prev => [...prev, newBreed]);
+                        alert("Note: Multiple images were not saved because the 'images' column is missing in your database. Only the main image was saved.\n\nPlease run the SQL command provided to enable multiple images.");
+                    } else {
+                        throw addError;
+                    }
+                }
             }
             setShowBreedModal(false);
             setCurrentBreed(null);
-            setSelectedFile(null);
-            setPreviewImage(null);
+            setSelectedFiles([]);
+            setPreviewImages([]);
         } catch (error) {
             console.error('Failed to save breed:', error);
             alert('Error saving breed: ' + error.message);
@@ -131,17 +167,42 @@ const Admin = ({ onLogout }) => {
         }
     };
 
+    const toggleStock = async (breed) => {
+        try {
+            // Check both properties as state/DB might differ in naming
+            const currentStock = breed.inStock ?? breed.in_stock;
+            const newStockStatus = !currentStock;
+
+            // We need to send 'in_stock' to Supabase
+            await breedService.update(breed.id, { in_stock: newStockStatus });
+
+            setBreeds(prev => prev.map(b =>
+                b.id === breed.id
+                    ? { ...b, inStock: newStockStatus, in_stock: newStockStatus }
+                    : b
+            ));
+        } catch (error) {
+            console.error('Failed to toggle stock:', error);
+            alert('Error updating stock status');
+        }
+    };
+
     const openEditModal = (breed) => {
         setCurrentBreed(breed);
-        setPreviewImage(null);
-        setSelectedFile(null);
+        // If breed has images array, use that. If not, check for single image.
+        const existingImages = (breed.images && breed.images.length > 0)
+            ? breed.images
+            : (breed.image ? [breed.image] : []);
+
+        setPreviewImages(existingImages);
+        setSelectedFiles([]);
         setShowBreedModal(true);
     };
 
     const openAddModal = () => {
         setCurrentBreed(null);
-        setPreviewImage(null);
-        setSelectedFile(null);
+        setPreviewImages([]);
+        setSelectedFiles([]);
         setShowBreedModal(true);
     };
 
@@ -306,11 +367,26 @@ const Admin = ({ onLogout }) => {
                                             </div>
                                         </div>
                                         <div className="text-xs text-white/50 mb-2">{breed.quality} • {breed.gender}</div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-bold text-accent">₹{breed.price}</span>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full ${breed.inStock ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
-                                                {breed.inStock ? 'In Stock' : 'Out of Stock'}
-                                            </span>
+                                        <div className="flex items-center justify-between mt-3">
+                                            <span className="font-bold text-accent text-lg">₹{breed.price}</span>
+                                            <label className="flex items-center gap-2 cursor-pointer group/toggle">
+                                                <div className="relative">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="sr-only"
+                                                        checked={breed.inStock ?? breed.in_stock}
+                                                        onChange={() => toggleStock(breed)}
+                                                    />
+                                                    <div className={`w-10 h-6 rounded-full transition-colors duration-300 ease-in-out ${(breed.inStock ?? breed.in_stock) ? 'bg-green-500' : 'bg-gray-600'
+                                                        }`}></div>
+                                                    <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-sm ${(breed.inStock ?? breed.in_stock) ? 'translate-x-4' : 'translate-x-0'
+                                                        }`}></div>
+                                                </div>
+                                                <span className={`text-xs font-bold select-none transition-colors ${(breed.inStock ?? breed.in_stock) ? 'text-green-400' : 'text-gray-500 group-hover/toggle:text-gray-400'
+                                                    }`}>
+                                                    {(breed.inStock ?? breed.in_stock) ? 'In Stock' : 'Out'}
+                                                </span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -480,34 +556,59 @@ const Admin = ({ onLogout }) => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Image</label>
-                                <div className="space-y-2">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (file) {
-                                                const reader = new FileReader();
-                                                reader.onloadend = () => {
-                                                    setPreviewImage(reader.result);
-                                                };
-                                                reader.readAsDataURL(file);
-                                                setSelectedFile(file);
-                                            }
-                                        }}
-                                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-lavender hover:file:bg-accent/20"
-                                    />
-                                    {(previewImage || currentBreed?.image) && (
-                                        <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                                            <img src={previewImage || currentBreed?.image} alt="Preview" className="w-full h-full object-cover" />
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Images</label>
+                                <div className="space-y-4">
+                                    <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-4 text-center hover:border-accent/50 transition-colors">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={(e) => {
+                                                const files = Array.from(e.target.files);
+                                                if (files.length > 0) {
+                                                    setSelectedFiles(prev => [...prev, ...files]);
+
+                                                    // Generate previews
+                                                    files.forEach(file => {
+                                                        const reader = new FileReader();
+                                                        reader.onloadend = () => {
+                                                            setPreviewImages(prev => [...prev, reader.result]);
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    });
+                                                }
+                                            }}
+                                            className="hidden"
+                                            id="image-upload"
+                                        />
+                                        <label htmlFor="image-upload" className="cursor-pointer">
+                                            <div className="text-accent font-bold mb-1">Click to Upload</div>
+                                            <div className="text-xs text-gray-500">JPG, PNG (Max 5MB)</div>
+                                        </label>
+                                    </div>
+
+                                    {previewImages.length > 0 && (
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {previewImages.map((img, idx) => (
+                                                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group">
+                                                    <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setPreviewImages(prev => prev.filter((_, i) => i !== idx));
+                                                            if (idx >= (previewImages.length - selectedFiles.length)) {
+                                                                const fileIdx = idx - (previewImages.length - selectedFiles.length);
+                                                                setSelectedFiles(prev => prev.filter((_, i) => i !== fileIdx));
+                                                            }
+                                                        }}
+                                                        className="absolute top-1 right-1 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        <X size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
-                                    <input
-                                        name="image"
-                                        type="hidden"
-                                        defaultValue={currentBreed?.image}
-                                    />
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">

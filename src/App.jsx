@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Breeds from './pages/Breeds';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import ProductDetails from './pages/ProductDetails';
 import { CartProvider } from './context/CartContext';
 
 import { supabase } from './lib/supabase';
@@ -56,6 +57,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/breeds" element={<Breeds />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
               <Route
                 path="/admin"
                 element={

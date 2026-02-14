@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ShoppingCart, Star, Info, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -12,7 +13,7 @@ const ProductCard = ({ product }) => {
     return (
         <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-surface-dark shadow-sm ring-1 ring-white/5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-accent/5">
             {/* Image Container */}
-            <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
+            <Link to={`/product/${product.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                 <img
                     src={product.image}
@@ -54,12 +55,14 @@ const ProductCard = ({ product }) => {
                         </span>
                     </div>
                 )}
-            </div>
+            </Link>
 
             {/* Content */}
             <div className="flex flex-1 flex-col p-4">
                 <div className="mb-1 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-white group-hover:text-accent transition-colors">{product.name}</h3>
+                    <Link to={`/product/${product.id}`} className="text-lg font-bold text-white group-hover:text-accent transition-colors hover:underline">
+                        {product.name}
+                    </Link>
                 </div>
 
                 <div className="mb-4 flex items-center gap-3 text-sm text-white/70">

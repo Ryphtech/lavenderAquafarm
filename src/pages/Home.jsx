@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ProductCard from '../components/ProductCard';
 import OrderModal from '../components/OrderModal';
 import { Trophy, Users, Heart, Sprout, MapPin, Phone, Mail, Check, Search, ShoppingBag } from 'lucide-react';
@@ -17,8 +17,10 @@ import mobileHeroImg5 from '../assets/hero-mobileCarousal5.jpeg';
 import selectiveBreedingImg from '../assets/selectiveBreeding.jpg';
 import qualityCheckImg from '../assets/qualityCheck.webp';
 import optimalGrowthImg from '../assets/optimalGrowth.png';
+import CircularGallery from '../components/CircularGallery';
 import logo from '../assets/logo.jpg';
 import { breedService } from '../services/mockData';
+import BlurText from '../components/BlurText';
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -30,6 +32,12 @@ const Home = () => {
 
     const bgImages = [heroImg1, heroImg2, heroImg3, heroImg4, heroImg5];
     const mobileBgImages = [mobileHeroImg1, mobileHeroImg2, mobileHeroImg3, mobileHeroImg4, mobileHeroImg5];
+
+    const galleryItems = useMemo(() => {
+        return products
+            .filter(p => p.quality === 'Top Quality')
+            .map(p => ({ image: p.image, text: p.name }));
+    }, [products]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -108,13 +116,28 @@ const Home = () => {
                     </div>
 
                     <div className="relative px-6 py-24 text-center max-w-5xl mx-auto z-10">
+
+
                         <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium text-sm mb-6 animate-fade-in-up">
                             🌿 Premium Guppy Breeding Farm
                         </span>
-                        <h2 className="text-5xl font-black tracking-tight text-white sm:text-7xl lg:text-8xl mb-8 drop-shadow-2xl animate-fade-in-up delay-100">
-                            Experience the <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-lavender to-purple-400">Vibrant Life</span>
-                        </h2>
+
+                        <div className="text-5xl font-black tracking-tight text-white sm:text-7xl lg:text-8xl mb-8 drop-shadow-2xl">
+                            <BlurText
+                                text="Experience the"
+                                className="justify-center text-white mb-2"
+                                delay={150}
+                                animateBy="words"
+                                direction="top"
+                            />
+                            <BlurText
+                                text="Vibrant Life"
+                                className="justify-center text-lavender font-extrabold"
+                                delay={150}
+                                animateBy="words"
+                                direction="top"
+                            />
+                        </div>
                         <p className="mx-auto max-w-2xl text-xl text-white mb-12 font-medium leading-relaxed drop-shadow-md animate-fade-in-up delay-200">
                             We breed the finest quality guppies with improved genetics, vibrant colors, and healthy lineages. Elevate your aquarium today.
                         </p>
@@ -223,6 +246,21 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Circular Gallery Section */}
+            <div className="h-[400px] md:h-[600px] w-full bg-background-light relative overflow-hidden">
+                <div className="absolute top-8 left-0 right-0 z-10 text-center">
+                    <h2 className="text-2xl md:text-3xl font-black text-white sm:text-4xl mb-2">Premium Collection</h2>
+                    <p className="text-white/70 text-sm md:text-base">Swipe to explore our finest breeds</p>
+                </div>
+                <CircularGallery
+                    items={galleryItems}
+                    bend={3}
+                    textColor="#ffffff"
+                    borderRadius={0.05}
+                    font="bold 30px Manrope"
+                />
             </div>
 
             {/* Shop Section */}
@@ -382,7 +420,7 @@ const Home = () => {
             />
 
             <CartDrawer onCheckout={handleCheckout} />
-        </div>
+        </div >
     );
 };
 
