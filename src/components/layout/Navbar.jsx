@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Droplets } from 'lucide-react';
+import { Menu, X, Droplets, ShoppingCart } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const location = useLocation();
+    const { cartCount, setIsCartOpen } = useCart();
 
     // Handle scroll effect for glassmorphism
     useEffect(() => {
@@ -44,20 +45,18 @@ const Navbar = () => {
     return (
         <nav className="fixed top-0 w-full z-50 pt-4 flex justify-center transition-all duration-300">
             <div className={`w-full max-w-[1280px] mx-4 sm:mx-6 lg:mx-8 rounded-2xl transition-all duration-300 ${scrolled
-                ? 'bg-[#faf8fc]/80 dark:bg-[#191022]/80 backdrop-blur-md border border-[#ede7f3] dark:border-[#382b47] shadow-lg py-1'
-                : 'bg-primary shadow-2xl shadow-primary/20 border border-white/10 py-2'}`}>
+                ? 'bg-neutral-900/90 dark:bg-neutral-950/90 backdrop-blur-md border border-neutral-800 shadow-lg py-1'
+                : 'bg-primary/80 backdrop-blur-sm shadow-2xl shadow-black/20 border border-white/10 py-2'}`}>
                 <div className="px-4 sm:px-6">
                     <div className="flex h-14 items-center justify-between">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-3 group">
                             <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors shadow-glow ${scrolled
-                                ? 'bg-primary/10 text-primary dark:bg-primary dark:text-white group-hover:bg-primary group-hover:text-white'
+                                ? 'bg-primary/20 text-white group-hover:bg-primary group-hover:text-white'
                                 : 'bg-white/10 text-white group-hover:bg-white/20'}`}>
                                 <Droplets size={18} fill="currentColor" />
                             </div>
-                            <h1 className={`text-lg font-extrabold tracking-tight sm:text-xl drop-shadow-sm transition-colors ${scrolled
-                                ? 'text-primary dark:text-white'
-                                : 'text-white'}`}>Lavender Aqua Farm</h1>
+                            <h1 className="text-lg font-extrabold tracking-tight sm:text-xl drop-shadow-sm transition-colors text-white">Lavender Aqua Farm</h1>
                         </Link>
 
                         {/* Desktop Nav */}
@@ -67,22 +66,44 @@ const Navbar = () => {
                                     key={link.name}
                                     href={link.hash ? `#${link.hash}` : link.path}
                                     onClick={(e) => handleNavClick(e, link)}
-                                    className={`text-sm font-bold transition-all px-3 py-1.5 rounded-lg ${scrolled
-                                        ? 'text-gray-600 hover:text-primary hover:bg-primary/5 dark:text-gray-300 dark:hover:text-white'
-                                        : 'text-purple-100 hover:text-white hover:bg-white/10'}`}
+                                    className={`text-sm font-bold transition-all px-3 py-1.5 rounded-lg text-white hover:bg-white/10`}
                                 >
                                     {link.name}
                                 </a>
                             ))}
+
+                            {/* Cart Icon */}
+                            <button
+                                onClick={() => setIsCartOpen(true)}
+                                className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition-all hover:bg-white/20 hover:scale-105"
+                            >
+                                <ShoppingCart size={20} />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white ring-2 ring-primary shadow-lg animate-bounce-subtle">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
                         </div>
 
-                        {/* Mobile Menu Button */}
-                        <div className="md:hidden">
+                        {/* Mobile Controls */}
+                        <div className="flex md:hidden items-center gap-4">
+                            {/* Mobile Cart */}
+                            <button
+                                onClick={() => setIsCartOpen(true)}
+                                className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition-all"
+                            >
+                                <ShoppingCart size={20} />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-black text-white ring-2 ring-primary">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
+
                             <button
                                 onClick={() => setIsOpen(!isOpen)}
-                                className={`focus:outline-none transition-colors ${scrolled
-                                    ? 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                                    : 'text-purple-100 hover:text-white'}`}
+                                className="focus:outline-none transition-colors text-white hover:opacity-80"
                             >
                                 {isOpen ? <X size={24} /> : <Menu size={24} />}
                             </button>
@@ -93,14 +114,14 @@ const Navbar = () => {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="md:hidden fixed top-24 left-4 right-4 z-40 bg-white/95 dark:bg-[#191022]/95 backdrop-blur-xl border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl overflow-hidden animate-fade-in-up">
+                <div className="md:hidden fixed top-24 left-4 right-4 z-40 bg-neutral-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl overflow-hidden animate-fade-in-up">
                     <div className="px-4 py-4 space-y-1">
                         {navLinks.map((link) => (
                             <a
                                 key={link.name}
                                 href={link.hash ? `#${link.hash}` : link.path}
                                 onClick={(e) => handleNavClick(e, link)}
-                                className="block px-4 py-3 rounded-xl text-base font-medium transition-colors text-gray-600 hover:text-primary hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"
+                                className="block px-4 py-3 rounded-xl text-base font-medium transition-colors text-white hover:bg-white/5"
                             >
                                 {link.name}
                             </a>

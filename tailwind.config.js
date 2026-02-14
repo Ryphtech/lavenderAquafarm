@@ -8,20 +8,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary": "#7f13ec",
-        "primary-dark": "#5e0eb0",
-        "secondary": "#ede7f3",
-        "background-light": "#f7f6f8",
-        "background-dark": "#191022",
-        "surface-dark": "#2a1e36",
-        "text-dark": "#140d1b",
+        "primary": "#0f172a", // Slate 900
+        "primary-dark": "#020617", // Slate 950
+        "secondary": "#f1f5f9", // Slate 100
+        "accent": "#d97706", // Amber 600
+        "background-light": "#0a0a0a", // Deep Neutral Grey
+        "background-dark": "#0a0a0a", // Deep Neutral Grey
+        "surface-dark": "#171717", // Slightly lighter grey for cards
+        "text-dark": "#ffffff", // Pure white text
       },
       fontFamily: {
         "display": ["Manrope", "sans-serif"]
       },
       borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
       boxShadow: {
-        'glow': '0 0 15px -3px rgba(127, 19, 236, 0.3)',
+        'glow': '0 0 15px -3px rgba(217, 119, 6, 0.3)', // Amber glow
       }
     },
   },

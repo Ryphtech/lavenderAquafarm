@@ -75,17 +75,17 @@ const Admin = () => {
         <div className="min-h-screen bg-background-light dark:bg-background-dark pt-28 pb-12 px-4 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <h1 className="text-3xl font-black text-gray-900 dark:text-white">Admin Dashboard</h1>
-                    <div className="flex bg-white dark:bg-surface-dark p-1 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+                    <h1 className="text-3xl font-black text-white">Admin Dashboard</h1>
+                    <div className="flex bg-surface-dark p-1 rounded-xl shadow-sm border border-white/10">
                         <button
                             onClick={() => setActiveTab('orders')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${activeTab === 'orders' ? 'bg-primary text-white' : 'text-gray-500 hover:text-primary dark:text-gray-400'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${activeTab === 'orders' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}`}
                         >
                             Orders
                         </button>
                         <button
                             onClick={() => setActiveTab('breeds')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${activeTab === 'breeds' ? 'bg-primary text-white' : 'text-gray-500 hover:text-primary dark:text-gray-400'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${activeTab === 'breeds' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}`}
                         >
                             Manage Breeds
                         </button>
@@ -93,14 +93,14 @@ const Admin = () => {
                 </div>
 
                 {activeTab === 'orders' ? (
-                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 overflow-hidden">
-                        <div className="p-4 border-b border-gray-100 dark:border-white/5">
+                    <div className="bg-surface-dark rounded-2xl shadow-sm border border-white/5 overflow-hidden">
+                        <div className="p-4 border-b border-white/5">
                             <div className="relative max-w-md">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                                 <input
                                     type="text"
                                     placeholder="Search by Phone or Order ID..."
-                                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-slate-600"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -109,7 +109,7 @@ const Admin = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-gray-50 dark:bg-white/5 text-xs uppercase text-gray-500 font-semibold">
+                                    <tr className="bg-white/5 text-xs uppercase text-slate-500 font-semibold">
                                         <th className="p-4">Order ID</th>
                                         <th className="p-4">Customer</th>
                                         <th className="p-4">Items</th>
@@ -118,21 +118,21 @@ const Admin = () => {
                                         <th className="p-4">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                                <tbody className="divide-y divide-white/5">
                                     {filteredOrders.map(order => (
-                                        <tr key={order.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
-                                            <td className="p-4 font-mono text-sm text-gray-900 dark:text-white">{order.id}</td>
+                                        <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="p-4 font-mono text-sm text-white">{order.id}</td>
                                             <td className="p-4">
-                                                <div className="font-bold text-gray-900 dark:text-white">{order.customerName}</div>
-                                                <div className="text-xs text-gray-500">{order.phone}</div>
+                                                <div className="font-bold text-white">{order.customerName}</div>
+                                                <div className="text-xs text-white/50">{order.phone}</div>
                                             </td>
-                                            <td className="p-4 text-sm text-gray-600 dark:text-gray-400">
+                                            <td className="p-4 text-sm text-white/70">
                                                 {order.items.length} item{order.items.length > 1 ? 's' : ''}
                                             </td>
-                                            <td className="p-4 font-bold text-primary">${order.totalAmount.toFixed(2)}</td>
+                                            <td className="p-4 font-bold text-accent">${order.totalAmount.toFixed(2)}</td>
                                             <td className="p-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'Confirmed' || order.status === 'Packed'
-                                                    ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                                    ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'
                                                     }`}>
                                                     {order.status}
                                                 </span>
@@ -141,15 +141,15 @@ const Admin = () => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => setSelectedOrder(order)}
-                                                        className="text-xs font-bold text-primary hover:underline"
+                                                        className="text-xs font-bold text-accent hover:underline"
                                                     >
                                                         View Details
                                                     </button>
                                                     <button
                                                         onClick={() => toggleOrderStatus(order.id)}
                                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${order.status === 'Packed'
-                                                            ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
-                                                            : 'bg-gray-100 text-gray-600 hover:bg-green-500 hover:text-white'
+                                                            ? 'bg-green-600 text-white shadow-lg shadow-green-500/30'
+                                                            : 'bg-white/10 text-white hover:bg-green-600 hover:text-white'
                                                             }`}
                                                     >
                                                         {order.status === 'Packed' ? <Check size={14} /> : <Package size={14} />}
@@ -164,9 +164,9 @@ const Admin = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 p-6">
+                    <div className="bg-surface-dark rounded-2xl shadow-sm border border-white/5 p-6">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Breed Inventory</h2>
+                            <h2 className="text-xl font-bold text-white">Breed Inventory</h2>
                             <button
                                 onClick={openAddModal}
                                 className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl font-bold transition-colors shadow-lg shadow-primary/20"
@@ -177,24 +177,24 @@ const Admin = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                             {breeds.map(breed => (
-                                <div key={breed.id} className="group flex gap-4 p-4 rounded-xl border border-gray-100 dark:border-white/10 hover:border-primary/30 hover:shadow-md transition-all bg-gray-50 dark:bg-white/5">
-                                    <img src={breed.image} alt={breed.name} className="w-20 h-20 rounded-lg object-cover bg-white" />
+                                <div key={breed.id} className="group flex gap-4 p-4 rounded-xl border border-white/10 hover:border-accent/30 hover:shadow-md transition-all bg-white/5">
+                                    <img src={breed.image} alt={breed.name} className="w-20 h-20 rounded-lg object-cover bg-gray-800" />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start mb-1">
-                                            <h3 className="font-bold text-gray-900 dark:text-white truncate">{breed.name}</h3>
+                                            <h3 className="font-bold text-white truncate">{breed.name}</h3>
                                             <div className="flex gap-1">
-                                                <button onClick={() => openEditModal(breed)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                                                <button onClick={() => openEditModal(breed)} className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors">
                                                     <Edit2 size={16} />
                                                 </button>
-                                                <button onClick={() => handleDeleteBreed(breed.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                                <button onClick={() => handleDeleteBreed(breed.id)} className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-gray-500 mb-2">{breed.quality} • {breed.gender}</div>
+                                        <div className="text-xs text-white/50 mb-2">{breed.quality} • {breed.gender}</div>
                                         <div className="flex items-center justify-between">
-                                            <span className="font-bold text-primary">${breed.price}</span>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full ${breed.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                            <span className="font-bold text-accent">${breed.price}</span>
+                                            <span className={`text-xs px-2 py-0.5 rounded-full ${breed.inStock ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
                                                 {breed.inStock ? 'In Stock' : 'Out of Stock'}
                                             </span>
                                         </div>

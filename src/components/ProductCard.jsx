@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Star, Info, Check } from 'lucide-react';
+import { ShoppingCart, Star, Info, Check } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
-const ProductCard = ({ product, onBuy }) => {
+const ProductCard = ({ product }) => {
+    const { addToCart, setIsCartOpen } = useCart();
     const [quantity, setQuantity] = useState(1);
 
     const increment = () => setQuantity(q => q + 1);
     const decrement = () => setQuantity(q => Math.max(1, q - 1));
 
     return (
-        <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-surface-dark shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+        <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-surface-dark shadow-sm ring-1 ring-white/5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-accent/5">
             {/* Image Container */}
             <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -57,55 +59,58 @@ const ProductCard = ({ product, onBuy }) => {
             {/* Content */}
             <div className="flex flex-1 flex-col p-4">
                 <div className="mb-1 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{product.name}</h3>
+                    <h3 className="text-lg font-bold text-white group-hover:text-accent transition-colors">{product.name}</h3>
                 </div>
 
-                <div className="mb-4 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                <div className="mb-4 flex items-center gap-3 text-sm text-white/70">
                     <div className="flex items-center gap-1">
-                        {product.gender === 'Male' && <span className="text-blue-500 font-bold">♂ Male</span>}
-                        {product.gender === 'Female' && <span className="text-pink-500 font-bold">♀ Female</span>}
-                        {product.gender === 'Pair' && <span className="text-purple-500 font-bold">⚥ Pair</span>}
+                        {product.gender === 'Male' && <span className="text-blue-400 font-bold">♂ Male</span>}
+                        {product.gender === 'Female' && <span className="text-pink-400 font-bold">♀ Female</span>}
+                        {product.gender === 'Pair' && <span className="text-violet-400 font-bold">⚥ Pair</span>}
                     </div>
-                    <span className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                    <span className="h-1 w-1 rounded-full bg-white/20"></span>
                     <span>{product.grade}</span>
                 </div>
 
                 <div className="mt-auto">
                     <div className="mb-3 flex items-baseline gap-1">
-                        <p className="text-xl font-bold text-primary dark:text-primary-300">
+                        <p className="text-xl font-bold text-white">
                             ${product.price ? product.price.toFixed(2) : '0.00'}
                         </p>
-                        <span className="text-xs text-gray-400">/ fish</span>
+                        <span className="text-xs text-white/50">/ fish</span>
                     </div>
 
                     <div className="flex gap-3">
                         {/* Qty Selector */}
-                        <div className={`flex h-10 items-center justify-between rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-[#1f1629] ${!product.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <div className={`flex h-10 items-center justify-between rounded-lg border border-white/10 bg-black/20 ${!product.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             <button
                                 onClick={decrement}
                                 disabled={!product.inStock}
-                                className="flex h-full w-8 items-center justify-center rounded-l-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none"
+                                className="flex h-full w-8 items-center justify-center rounded-l-lg text-white/50 hover:bg-white/10 hover:text-white focus:outline-none"
                             >
                                 -
                             </button>
-                            <span className="text-sm font-semibold dark:text-white w-4 text-center">{quantity}</span>
+                            <span className="text-sm font-semibold text-white w-4 text-center">{quantity}</span>
                             <button
                                 onClick={increment}
                                 disabled={!product.inStock}
-                                className="flex h-full w-8 items-center justify-center rounded-r-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none"
+                                className="flex h-full w-8 items-center justify-center rounded-r-lg text-white/50 hover:bg-white/10 hover:text-white focus:outline-none"
                             >
                                 +
                             </button>
                         </div>
 
-                        {/* Buy Button */}
+                        {/* Add to Cart Button */}
                         <button
-                            onClick={() => onBuy(product, quantity)}
+                            onClick={() => {
+                                addToCart(product, quantity);
+                                setIsCartOpen(true);
+                            }}
                             disabled={!product.inStock}
-                            className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-[#2a1e36] ${!product.inStock ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
+                            className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-[#1e293b] ${!product.inStock ? 'opacity-50 cursor-not-allowed bg-slate-400 hover:bg-slate-400' : ''}`}
                         >
-                            <ShoppingBag size={18} />
-                            {product.inStock ? 'Buy Now' : 'Sold Out'}
+                            <ShoppingCart size={18} />
+                            {product.inStock ? 'Add to Cart' : 'Sold Out'}
                         </button>
                     </div>
                 </div>

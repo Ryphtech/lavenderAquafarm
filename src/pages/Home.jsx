@@ -1,31 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initialBreeds } from '../data/mockData';
 import ProductCard from '../components/ProductCard';
 import OrderModal from '../components/OrderModal';
-import { ChevronDown, Trophy, Users, Heart, Sprout, MapPin, Phone, Mail, Check } from 'lucide-react';
+import { Trophy, Users, Heart, Sprout, MapPin, Phone, Mail, Check, Search, ShoppingBag } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import CartDrawer from '../components/CartDrawer';
+import heroImg1 from '../assets/hero-carousal1.jpeg';
+import heroImg2 from '../assets/hero-carousal2.jpeg';
+import heroImg3 from '../assets/hero-carousal3.jpeg';
+import heroImg4 from '../assets/hero-carousal4.jpeg';
+import heroImg5 from '../assets/hero-carousal5.jpeg';
+import selectiveBreedingImg from '../assets/selectiveBreeding.jpg';
+import qualityCheckImg from '../assets/qualityCheck.webp';
+import optimalGrowthImg from '../assets/optimalGrowth.png';
 
 const Home = () => {
     const [products] = useState(initialBreeds);
     const [filter, setFilter] = useState('All');
     const [showModal, setShowModal] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [orderQuantity, setOrderQuantity] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentBg, setCurrentBg] = useState(0);
+
+    const bgImages = [heroImg1, heroImg2, heroImg3, heroImg4, heroImg5];
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentBg((prev) => (prev + 1) % bgImages.length);
+        }, 1500);
+        return () => clearInterval(timer);
+    }, [bgImages.length]);
 
     const categories = ['All', 'In Stock', 'Top Quality', 'Pairs', 'Females Only'];
 
-    const handleBuy = (product, quantity) => {
-        setSelectedProduct(product);
-        setOrderQuantity(quantity);
+    const { setIsCartOpen } = useCart();
+
+    const handleCheckout = () => {
         setShowModal(true);
+        setIsCartOpen(false);
     };
 
     const filteredProducts = products.filter(product => {
-        if (filter === 'All') return true;
-        if (filter === 'In Stock') return product.inStock;
-        if (filter === 'Top Quality') return product.quality === 'Top Quality';
-        if (filter === 'Pairs') return product.gender === 'Pair';
-        if (filter === 'Females Only') return product.gender === 'Female';
-        return true;
+        const matchesFilter =
+            filter === 'All' ||
+            (filter === 'In Stock' && product.inStock) ||
+            (filter === 'Top Quality' && product.quality === 'Top Quality') ||
+            (filter === 'Pairs' && product.gender === 'Pair') ||
+            (filter === 'Females Only' && product.gender === 'Female');
+
+        const matchesSearch =
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (product.variety && product.variety.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (product.grade && product.grade.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        return matchesFilter && matchesSearch;
     });
 
     return (
@@ -33,11 +60,17 @@ const Home = () => {
             {/* Hero Section Wrapper */}
             <div className="md:max-w-[1280px] md:mx-auto md:px-4 md:pt-32 pt-28">
                 <div className="relative min-h-[90vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden rounded-b-[3rem] md:rounded-[2.5rem] bg-gray-900 shadow-2xl ring-1 ring-white/10">
-                    {/* Background Image */}
+                    {/* Background Slider */}
                     <div className="absolute inset-0">
-                        <div className="h-full w-full bg-cover bg-center transform scale-105" style={{ backgroundImage: "url('https://splashyfishstore.com/cdn/shop/articles/Low_Light_Freshwater_Plants_for_Aquarium_6262a715-dc3d-4b38-99e7-d6eb4bdfc327.jpg?v=1757836664')" }}></div>
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-purple-900/40 to-black/80"></div>
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        {bgImages.map((img, index) => (
+                            <div
+                                key={index}
+                                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out brightness-[0.6] ${currentBg === index ? 'opacity-100' : 'opacity-0'}`}
+                                style={{ backgroundImage: `url('${img}')` }}
+                            ></div>
+                        ))}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90"></div>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
                     </div>
 
                     <div className="relative px-6 py-24 text-center max-w-5xl mx-auto z-10">
@@ -46,13 +79,13 @@ const Home = () => {
                         </span>
                         <h2 className="text-5xl font-black tracking-tight text-white sm:text-7xl lg:text-8xl mb-8 drop-shadow-2xl animate-fade-in-up delay-100">
                             Experience the <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300">Vibrant Life</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200">Vibrant Life</span>
                         </h2>
-                        <p className="mx-auto max-w-2xl text-xl text-purple-100 mb-12 font-medium leading-relaxed drop-shadow-md animate-fade-in-up delay-200">
+                        <p className="mx-auto max-w-2xl text-xl text-white mb-12 font-medium leading-relaxed drop-shadow-md animate-fade-in-up delay-200">
                             We breed the finest quality guppies with improved genetics, vibrant colors, and healthy lineages. Elevate your aquarium today.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
-                            <a href="#shop" className="inline-flex items-center justify-center rounded-2xl bg-primary px-8 py-4 text-lg font-bold text-white shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black">
+                            <a href="#shop" className="inline-flex items-center justify-center rounded-2xl bg-accent px-8 py-4 text-lg font-bold text-white shadow-lg shadow-accent/30 transition-all hover:scale-105 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-black">
                                 Shop Collection
                             </a>
                             <a href="#story" className="inline-flex items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:scale-105 hover:bg-white/20 focus:outline-none">
@@ -65,36 +98,36 @@ const Home = () => {
 
             {/* Stats Section */}
             <div className="relative -mt-12 z-20 max-w-4xl mx-auto px-4">
-                <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-lg p-4 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center border border-gray-100 dark:border-gray-800">
-                    <div className="space-y-1">
-                        <div className="flex justify-center text-primary mb-1"><Users size={24} /></div>
-                        <h4 className="text-2xl font-black text-gray-900 dark:text-white">1000+</h4>
-                        <p className="text-xs font-bold text-gray-500">Happy Customers</p>
+                <div className="bg-surface-dark/80 backdrop-blur-md rounded-2xl shadow-xl p-4 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center border border-white/5">
+                    <div className="space-y-1 text-center">
+                        <div className="flex justify-center text-accent mb-1"><Users size={24} /></div>
+                        <h4 className="text-2xl font-black text-white">1000+</h4>
+                        <p className="text-xs font-bold text-white/90">Happy Customers</p>
                     </div>
-                    <div className="space-y-1">
-                        <div className="flex justify-center text-pink-500 mb-1"><Heart size={24} /></div>
-                        <h4 className="text-2xl font-black text-gray-900 dark:text-white">50+</h4>
-                        <p className="text-xs font-bold text-gray-500">Unique Breeds</p>
+                    <div className="space-y-1 text-center">
+                        <div className="flex justify-center text-accent mb-1"><Heart size={24} /></div>
+                        <h4 className="text-2xl font-black text-white">50+</h4>
+                        <p className="text-xs font-bold text-white/90">Unique Breeds</p>
                     </div>
-                    <div className="space-y-1">
-                        <div className="flex justify-center text-green-500 mb-1"><Trophy size={24} /></div>
-                        <h4 className="text-2xl font-black text-gray-900 dark:text-white">15+</h4>
-                        <p className="text-xs font-bold text-gray-500">Awards Won</p>
+                    <div className="space-y-1 text-center">
+                        <div className="flex justify-center text-accent mb-1"><Trophy size={24} /></div>
+                        <h4 className="text-2xl font-black text-white">15+</h4>
+                        <p className="text-xs font-bold text-white/90">Awards Won</p>
                     </div>
-                    <div className="space-y-1">
-                        <div className="flex justify-center text-blue-500 mb-1"><Sprout size={24} /></div>
-                        <h4 className="text-2xl font-black text-gray-900 dark:text-white">5+</h4>
-                        <p className="text-xs font-bold text-gray-500">Years Experience</p>
+                    <div className="space-y-1 text-center">
+                        <div className="flex justify-center text-accent mb-1"><Sprout size={24} /></div>
+                        <h4 className="text-2xl font-black text-white">5+</h4>
+                        <p className="text-xs font-bold text-white/90">Years Experience</p>
                     </div>
                 </div>
             </div>
 
             {/* Farm Story Section */}
-            <div id="story" className="py-24 bg-background-light dark:bg-background-dark">
+            <div id="story" className="py-24 bg-background-dark">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-base font-bold text-primary tracking-wide uppercase">Our Journey</h2>
-                        <h3 className="mt-2 text-3xl font-black tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                        <h2 className="text-base font-bold text-accent tracking-wide uppercase">Our Journey</h2>
+                        <h3 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
                             The Path of Perfection
                         </h3>
                     </div>
@@ -105,34 +138,52 @@ const Home = () => {
                         <div className="space-y-12">
                             {/* Step 1 */}
                             <div className="relative flex flex-col md:flex-row items-center justify-between group">
-                                <div className="md:w-[45%] bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-md border border-gray-100 dark:border-white/5 hover:border-primary/30 transition-all">
-                                    <span className="text-4xl mb-4 block">🧬</span>
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Selective Breeding</h4>
-                                    <p className="text-gray-600 dark:text-gray-400">We carefully select parent fish with the best traits—color, fin shape, and vitality—to ensure the next generation is even better.</p>
+                                <div className="md:w-[45%] relative overflow-hidden rounded-2xl shadow-xl transition-all duration-500 hover:scale-[1.02] group/card">
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover/card:scale-110"
+                                        style={{ backgroundImage: `url(${selectiveBreedingImg})` }}
+                                    ></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
+                                    <div className="relative p-8 min-h-[220px] flex flex-col justify-end">
+                                        <h4 className="text-xl font-bold text-white mb-2">Selective Breeding</h4>
+                                        <p className="text-white text-sm leading-relaxed">We carefully select parent fish with the best traits—color, fin shape, and vitality—to ensure the next generation is even better.</p>
+                                    </div>
                                 </div>
-                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary border-4 border-white dark:border-[#191022] hidden md:block z-10"></div>
+                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent border-4 border-slate-900 hidden md:block z-10"></div>
                                 <div className="md:w-[45%]"></div>
                             </div>
 
                             {/* Step 2 */}
                             <div className="relative flex flex-col md:flex-row-reverse items-center justify-between group">
-                                <div className="md:w-[45%] bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-md border border-gray-100 dark:border-white/5 hover:border-primary/30 transition-all">
-                                    <span className="text-4xl mb-4 block">🌱</span>
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Optimal Growth Environment</h4>
-                                    <p className="text-gray-600 dark:text-gray-400">Our fry are raised in spacious tanks with live plants and high-quality nutrition to promote rapid and healthy growth.</p>
+                                <div className="md:w-[45%] relative overflow-hidden rounded-2xl shadow-xl transition-all duration-500 hover:scale-[1.02] group/card">
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover/card:scale-110"
+                                        style={{ backgroundImage: `url(${optimalGrowthImg})` }}
+                                    ></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
+                                    <div className="relative p-8 min-h-[220px] flex flex-col justify-end text-right">
+                                        <h4 className="text-xl font-bold text-white mb-2">Optimal Growth Environment</h4>
+                                        <p className="text-white text-sm leading-relaxed">Our fry are raised in spacious tanks with live plants and high-quality nutrition to promote rapid and healthy growth.</p>
+                                    </div>
                                 </div>
-                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-pink-500 border-4 border-white dark:border-[#191022] hidden md:block z-10"></div>
+                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-amber-500 border-4 border-slate-900 hidden md:block z-10"></div>
                                 <div className="md:w-[45%]"></div>
                             </div>
 
                             {/* Step 3 */}
                             <div className="relative flex flex-col md:flex-row items-center justify-between group">
-                                <div className="md:w-[45%] bg-white dark:bg-surface-dark p-6 rounded-2xl shadow-md border border-gray-100 dark:border-white/5 hover:border-primary/30 transition-all">
-                                    <span className="text-4xl mb-4 block">🔍</span>
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Quality Check</h4>
-                                    <p className="text-gray-600 dark:text-gray-400">Before listing, every fish undergoes a rigorous health and quality inspection. Only the best make it to our shop.</p>
+                                <div className="md:w-[45%] relative overflow-hidden rounded-2xl shadow-xl transition-all duration-500 hover:scale-[1.02] group/card">
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover/card:scale-110"
+                                        style={{ backgroundImage: `url(${qualityCheckImg})` }}
+                                    ></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
+                                    <div className="relative p-8 min-h-[220px] flex flex-col justify-end">
+                                        <h4 className="text-xl font-bold text-white mb-2">Quality Check</h4>
+                                        <p className="text-white text-sm leading-relaxed">Before listing, every fish undergoes a rigorous health and quality inspection. Only the best make it to our shop.</p>
+                                    </div>
                                 </div>
-                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-blue-500 border-4 border-white dark:border-[#191022] hidden md:block z-10"></div>
+                                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-yellow-600 border-4 border-slate-900 hidden md:block z-10"></div>
                                 <div className="md:w-[45%]"></div>
                             </div>
                         </div>
@@ -143,14 +194,14 @@ const Home = () => {
             {/* Shop Section */}
             <div id="shop" className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white sm:text-4xl mb-4">
-                        New Arrivals
+                    <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl mb-4">
+                        Explore Varieties
                     </h2>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">Explore our latest collection of exotic guppies.</p>
+                    <p className="text-lg text-white">Explore our latest collection of exotic guppies.</p>
                 </div>
 
                 {/* Filters & Sort */}
-                <div id="shop" className="sticky top-[4.5rem] z-40 -mx-4 mb-8 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm px-4 py-3 sm:mx-0 sm:rounded-xl sm:px-0">
+                <div id="shop" className="sticky top-[4.5rem] z-40 -mx-4 mb-8 bg-background-dark/95 backdrop-blur-sm px-4 py-3 sm:mx-0 sm:rounded-xl sm:px-0">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         {/* Categories */}
                         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 sm:pb-0">
@@ -159,8 +210,8 @@ const Home = () => {
                                     key={cat}
                                     onClick={() => setFilter(cat)}
                                     className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition-all ${filter === cat
-                                        ? 'bg-primary text-white shadow-glow'
-                                        : 'bg-secondary dark:bg-surface-dark text-text-dark dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900/30'
+                                        ? 'bg-accent text-white shadow-lg'
+                                        : 'bg-surface-dark text-white hover:bg-surface-dark/80 border border-white/10'
                                         }`}
                                 >
                                     {cat}
@@ -168,13 +219,16 @@ const Home = () => {
                             ))}
                         </div>
 
-                        {/* Sort (Placeholder) */}
-                        <div className="flex items-center gap-2 border-l pl-4 border-gray-200 dark:border-gray-700 hidden sm:flex">
-                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Sort by:</span>
-                            <div className="flex items-center gap-1 cursor-pointer text-sm font-bold text-primary">
-                                <span>Newest</span>
-                                <ChevronDown size={16} />
-                            </div>
+                        {/* Search Bar */}
+                        <div className="relative flex-1 max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search varieties / breeds..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 rounded-xl border border-white/10 bg-surface-dark text-white focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder-white/30"
+                            />
                         </div>
                     </div>
                 </div>
@@ -186,16 +240,15 @@ const Home = () => {
                             <ProductCard
                                 key={product.id}
                                 product={product}
-                                onBuy={handleBuy}
                             />
                         ))}
                     </div>
                 ) : (
                     <div className="text-center py-20">
-                        <p className="text-gray-500 text-lg">No products found matching your filter.</p>
+                        <p className="text-white text-lg">No products found matching your filter.</p>
                         <button
                             onClick={() => setFilter('All')}
-                            className="mt-4 text-primary font-bold hover:underline"
+                            className="mt-4 text-accent font-bold hover:underline"
                         >
                             View All Breeds
                         </button>
@@ -204,24 +257,24 @@ const Home = () => {
             </div>
 
             {/* Need Help / About Section */}
-            <div id="about" className="bg-white dark:bg-surface-dark py-24 border-t border-gray-100 dark:border-white/5">
+            <div id="about" className="bg-background-dark py-24 border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                         <div>
-                            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-6">About Lavender Aqua Farm</h2>
-                            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                            <h2 className="text-3xl font-black text-white mb-6">About Lavender Aqua Farm</h2>
+                            <p className="text-lg text-white mb-6 leading-relaxed opacity-90">
                                 Founded in 2020, Lavender Aqua Farm started as a passion project and grew into a premier destination for guppy enthusiasts. Located in the serene landscapes of Kerala, our farm focuses on sustainable breeding practices and genetic excellence.
                             </p>
-                            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                            <p className="text-lg text-white mb-8 leading-relaxed opacity-90">
                                 Our mission is to bring the most colorful, healthy, and rare guppy strains to your doorstep, ensuring every hobbyist gets to experience the joy of a vibrant aquarium.
                             </p>
                             <div className="flex gap-4">
-                                <div className="flex items-center gap-2 text-primary font-bold">
-                                    <Check className="w-5 h-5 bg-green-100 text-green-600 rounded-full p-1" />
+                                <div className="flex items-center gap-2 text-accent font-bold">
+                                    <Check className="w-5 h-5 bg-green-500/20 text-green-500 rounded-full p-1" />
                                     <span>Sustainable Breeding</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-primary font-bold">
-                                    <Check className="w-5 h-5 bg-green-100 text-green-600 rounded-full p-1" />
+                                <div className="flex items-center gap-2 text-accent font-bold">
+                                    <Check className="w-5 h-5 bg-green-500/20 text-green-500 rounded-full p-1" />
                                     <span>Pan-India Shipping</span>
                                 </div>
                             </div>
@@ -239,24 +292,25 @@ const Home = () => {
             </div>
 
             {/* Contact Section */}
-            <div id="contact" className="bg-primary py-24 text-white text-center">
-                <div className="max-w-4xl mx-auto px-4">
-                    <h2 className="text-3xl font-black mb-8">Get in Touch</h2>
+            <div id="contact" className="bg-background-dark py-24 relative overflow-hidden">
+                <div className="absolute inset-0 bg-accent/5 pointer-events-none"></div>
+                <div className="max-w-4xl mx-auto px-4 relative z-10">
+                    <h2 className="text-3xl font-black text-white mb-12 text-center">Get in Touch</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer">
-                            <div className="mb-4 flex justify-center"><Phone size={32} /></div>
-                            <h3 className="text-xl font-bold mb-2">WhatsApp Support</h3>
-                            <p className="text-purple-100">+91 77366 81820</p>
+                        <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center">
+                            <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Phone size={32} /></div>
+                            <h3 className="text-xl font-bold mb-2 text-white">WhatsApp Support</h3>
+                            <p className="text-white">+91 77366 81820</p>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer">
-                            <div className="mb-4 flex justify-center"><Mail size={32} /></div>
-                            <h3 className="text-xl font-bold mb-2">Email Us</h3>
-                            <p className="text-purple-100">contact@lavenderaqua.com</p>
+                        <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center">
+                            <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Mail size={32} /></div>
+                            <h3 className="text-xl font-bold mb-2 text-white">Email Us</h3>
+                            <p className="text-white">contact@lavenderaqua.com</p>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer">
-                            <div className="mb-4 flex justify-center"><MapPin size={32} /></div>
-                            <h3 className="text-xl font-bold mb-2">Visit Farm</h3>
-                            <p className="text-purple-100">Kochi, Kerala, India</p>
+                        <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center">
+                            <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><MapPin size={32} /></div>
+                            <h3 className="text-xl font-bold mb-2 text-white">Visit Farm</h3>
+                            <p className="text-white">Kochi, Kerala, India</p>
                         </div>
                     </div>
                 </div>
@@ -265,9 +319,9 @@ const Home = () => {
             <OrderModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
-                product={selectedProduct}
-                quantity={orderQuantity}
             />
+
+            <CartDrawer onCheckout={handleCheckout} />
         </div>
     );
 };
