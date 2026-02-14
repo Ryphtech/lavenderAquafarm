@@ -289,7 +289,8 @@ class App {
             borderRadius = 0,
             font = 'bold 30px Figtree',
             scrollSpeed = 2,
-            scrollEase = 0.05
+            scrollEase = 0.05,
+            autoScroll = true
         } = {}
     ) {
         document.documentElement.classList.remove('no-js');
@@ -305,6 +306,19 @@ class App {
         this.createMedias(items, bend, textColor, borderRadius, font);
         this.update();
         this.addEventListeners();
+
+        if (autoScroll) {
+            this.initAutoScroll();
+        }
+    }
+
+    initAutoScroll() {
+        this.autoScrollTimer = setInterval(() => {
+            if (this.isDown) return;
+            if (!this.medias || !this.medias[0]) return;
+            const width = this.medias[0].width;
+            this.scroll.target -= width;
+        }, 2000);
     }
     createRenderer() {
         this.renderer = new Renderer({
@@ -450,6 +464,9 @@ class App {
         if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode) {
             this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas);
         }
+        if (this.autoScrollTimer) {
+            clearInterval(this.autoScrollTimer);
+        }
     }
 }
 
@@ -460,11 +477,12 @@ export default function CircularGallery({
     borderRadius = 0.05,
     font = 'bold 30px Figtree',
     scrollSpeed = 2,
-    scrollEase = 0.05
+    scrollEase = 0.05,
+    autoScroll = true
 }) {
     const containerRef = useRef(null);
     useEffect(() => {
-        const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase });
+        const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, autoScroll });
         return () => {
             app.destroy();
         };
