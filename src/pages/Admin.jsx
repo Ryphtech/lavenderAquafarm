@@ -120,6 +120,7 @@ const Admin = ({ onLogout }) => {
                 quality: formData.get('quality'),
                 gender: formData.get('gender'),
                 grade: formData.get('grade'),
+                description: formData.get('description'),
                 image: mainImage, // Backward compatibility
                 images: finalImages, // New multiple images support
                 in_stock: formData.get('inStock') === 'on'
@@ -554,6 +555,16 @@ const Admin = ({ onLogout }) => {
                                     placeholder="e.g. Grade A"
                                     className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-black/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder-white/50"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Description</label>
+                                <textarea
+                                    name="description"
+                                    defaultValue={currentBreed?.description}
+                                    placeholder="Enter breed description..."
+                                    rows="3"
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-black/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder-white/50 resize-y"
+                                ></textarea>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Images</label>
