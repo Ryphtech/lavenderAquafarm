@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, MapPin } from 'lucide-react';
+import { Phone, MapPin, Mail } from 'lucide-react';
 import logo from '../../assets/logo.jpg';
 
 const Footer = () => {
@@ -22,13 +22,17 @@ const Footer = () => {
                     <div>
                         <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
                         <div className="space-y-3">
-                            <div className="flex items-center text-white/70">
-                                <MapPin size={18} className="mr-2" />
-                                <span className="text-sm">123 Aqua Lane, Lake District</span>
+                            <div className="flex items-start text-white/70">
+                                <MapPin size={18} className="mr-2 mt-0.5 shrink-0" />
+                                <span className="text-sm">123 Aqua Lane, Lake District, Trivandrum, Kerala, India</span>
                             </div>
                             <div className="flex items-center text-white/70">
-                                <Phone size={18} className="mr-2" />
-                                <span className="text-sm">+91 98765 43210</span>
+                                <Phone size={18} className="mr-2 shrink-0" />
+                                <span className="text-sm">+91 9633206134</span>
+                            </div>
+                            <div className="flex items-center text-white/70">
+                                <Mail size={18} className="mr-2 shrink-0" />
+                                <a href="mailto:lavenderaquafarm@gmail.com" className="text-sm hover:text-accent transition-colors">lavenderaquafarm@gmail.com</a>
                             </div>
                         </div>
                     </div>
@@ -37,7 +41,6 @@ const Footer = () => {
                         <ul className="space-y-2 text-sm text-white/70">
                             <li><a href="/#shop" className="hover:text-accent transition-colors">Home</a></li>
                             <li><a href="/#shop" className="hover:text-accent transition-colors">Fish Breeds</a></li>
-                            <li><Link to="/admin" onClick={() => window.scrollTo(0, 0)} className="hover:text-accent transition-colors">Admin Access</Link></li>
                         </ul>
                     </div>
                 </div>
