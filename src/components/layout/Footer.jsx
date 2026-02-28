@@ -24,7 +24,7 @@ const Footer = () => {
                         <div className="space-y-3">
                             <div className="flex items-start text-white/70">
                                 <MapPin size={18} className="mr-2 mt-0.5 shrink-0" />
-                                <span className="text-sm">123 Aqua Lane, Lake District, Trivandrum, Kerala, India</span>
+                                <span className="text-sm">Trivandrum, Kerala, India</span>
                             </div>
                             <div className="flex items-center text-white/70">
                                 <Phone size={18} className="mr-2 shrink-0" />
