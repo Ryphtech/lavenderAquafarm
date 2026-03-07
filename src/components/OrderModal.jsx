@@ -65,7 +65,10 @@ const OrderModal = ({ isOpen, onClose }) => {
                 `*Order Items:*\n${itemsList}\n\n` +
                 `*Total Amount: ₹${cartTotal}*`;
 
-            const whatsappUrl = `https://wa.me/917736681820?text=${encodeURIComponent(message)}`;
+            const whatsappUrl = `https://wa.me/919633206134?text=${encodeURIComponent(message)}`;
+
+            // Display popup message for user
+            alert("Order will be packed on the upcoming mondays");
 
             // Redirect to WhatsApp
             window.open(whatsappUrl, '_blank');

@@ -379,15 +379,15 @@ const Home = () => {
                             <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center sm:col-span-2 lg:col-span-1">
                                 <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Phone size={32} /></div>
                                 <h3 className="text-xl font-bold mb-2 text-white">WhatsApp Support</h3>
-                                <p className="text-white">+91 77366 81820</p>
+                                <p className="text-white">+91 9633206134</p>
                             </div>
                             <div className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center sm:col-span-1 lg:col-span-1">
                                 <div className="mb-4 flex justify-center text-accent group-hover:scale-110 transition-transform"><Mail size={32} /></div>
                                 <h3 className="text-xl font-bold mb-2 text-white">Email Us</h3>
-                                <p className="text-white">contact@lavenderaqua.com</p>
+                                <p className="text-white">lavenderaquafarm@gmail.com</p>
                             </div>
                             <a
-                                href="https://wa.me/917736681820?text=Hi%2C%20I%20would%20like%20to%20request%20a%20visit%20to%20Lavender%20Aqua%20Farm."
+                                href="https://wa.me/919633206134?text=Hi%2C%20I%20would%20like%20to%20request%20a%20visit%20to%20Lavender%20Aqua%20Farm."
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="bg-surface-dark/40 backdrop-blur-md p-8 rounded-2xl border border-white/5 hover:bg-surface-dark/60 transition-all cursor-pointer group text-center sm:col-span-1 lg:col-span-2 block"
