@@ -46,12 +46,47 @@ const Admin = ({ onLogout }) => {
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
             await orderService.update(orderId, { status: newStatus });
-            setOrders(prev => prev.map(order =>
-                order.id === orderId ? { ...order, status: newStatus } : order
+
+            // Find the full order object for customer details
+            const order = orders.find(o => o.id === orderId);
+
+            setOrders(prev => prev.map(o =>
+                o.id === orderId ? { ...o, status: newStatus } : o
             ));
             if (selectedOrder && selectedOrder.id === orderId) {
                 setSelectedOrder(prev => ({ ...prev, status: newStatus }));
             }
+
+            // WhatsApp Integration for Confirmed/Packed
+            if (order && order.phone && (newStatus === 'Confirmed' || newStatus === 'Packed')) {
+                const customerName = order.customer_name || order.customerName || 'Customer';
+                let message = '';
+
+                // Format order details
+                const itemsList = order.items && order.items.length > 0
+                    ? order.items.map(item => `- ${item.name} (${item.quantity} x ₹${item.price})`).join('\n')
+                    : 'No items detailed';
+
+                const totalAmount = order.total_amount || order.totalAmount || 0;
+
+                const orderDetailsText = `\n\n*Order Details:*\n${itemsList}\n\n*Total Amount: ₹${totalAmount}*`;
+
+                if (newStatus === 'Confirmed') {
+                    message = `Hello ${customerName}, your order *${orderId}* from Lavender Aqua Farm has been confirmed! We will notify you once it is packed.${orderDetailsText}`;
+                } else if (newStatus === 'Packed') {
+                    message = `Hello ${customerName}, your order *${orderId}* from Lavender Aqua Farm has been securely packed and will be shipped soon!${orderDetailsText}`;
+                }
+
+                // Format phone number to ensure it has country code if missing
+                let phoneNum = order.phone.replace(/[^0-9]/g, '');
+                if (phoneNum.length === 10) {
+                    phoneNum = '91' + phoneNum; // Assuming India default if just 10 digits
+                }
+
+                const whatsappUrl = `https://wa.me/${phoneNum}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+            }
+
         } catch (error) {
             console.error('Failed to update order status:', error);
             alert('Error updating status');

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { X, MessageCircle, ShoppingBag } from 'lucide-react';
+import { X, MessageCircle, ShoppingBag, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { orderService } from '../services/mockData';
 
 const OrderModal = ({ isOpen, onClose }) => {
     const { cartItems, cartTotal, clearCart } = useCart();
+    const [successData, setSuccessData] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -67,13 +68,8 @@ const OrderModal = ({ isOpen, onClose }) => {
 
             const whatsappUrl = `https://wa.me/919633206134?text=${encodeURIComponent(message)}`;
 
-            // Display popup message for user
-            alert("Order will be packed on the upcoming mondays");
-
-            // Redirect to WhatsApp
-            window.open(whatsappUrl, '_blank');
-            clearCart();
-            onClose();
+            // Show custom success popup
+            setSuccessData({ whatsappUrl });
         } catch (error) {
             console.error('Failed to create order:', error);
             console.error('Error details:', {
@@ -87,6 +83,43 @@ const OrderModal = ({ isOpen, onClose }) => {
         }
     };
 
+
+    const handleSuccessClose = () => {
+        if (successData && successData.whatsappUrl) {
+            window.open(successData.whatsappUrl, '_blank');
+        }
+        clearCart();
+        setSuccessData(null);
+        onClose();
+    };
+
+    if (successData) {
+        return (
+            <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+                {/* Backdrop */}
+                <div
+                    className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity"
+                    onClick={handleSuccessClose}
+                ></div>
+
+                {/* Success Modal */}
+                <div className="relative w-full max-w-sm transform rounded-3xl bg-surface-dark p-6 sm:p-8 text-center shadow-2xl transition-all border border-white/10">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 mb-6">
+                        <Check size={32} className="text-green-500" />
+                    </div>
+                    <h3 className="text-2xl font-black text-white mb-2">Order placed!</h3>
+                    <p className="text-white/70 mb-8 font-medium">Order will be packed on the upcoming mondays.</p>
+                    <button
+                        onClick={handleSuccessClose}
+                        className="w-full flex justify-center items-center gap-2 rounded-xl bg-accent px-6 py-4 font-bold text-white shadow-xl shadow-accent/20 hover:bg-purple-600 transition-colors focus:outline-none"
+                    >
+                        <MessageCircle size={20} />
+                        Continue to WhatsApp
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
