@@ -108,7 +108,8 @@ const OrderModal = ({ isOpen, onClose }) => {
                         <Check size={32} className="text-green-500" />
                     </div>
                     <h3 className="text-2xl font-black text-white mb-2">Order placed!</h3>
-                    <p className="text-white/70 mb-8 font-medium">Order will be packed on the upcoming mondays.</p>
+                    <p className="text-white/70 mb-2 font-medium">Order will be packed on the upcoming mondays.</p>
+                    <p className="text-white/50 text-sm mb-8 italic">Please note: Additional shipping costs and charges apply.</p>
                     <button
                         onClick={handleSuccessClose}
                         className="w-full flex justify-center items-center gap-2 rounded-xl bg-accent px-6 py-4 font-bold text-white shadow-xl shadow-accent/20 hover:bg-purple-600 transition-colors focus:outline-none"

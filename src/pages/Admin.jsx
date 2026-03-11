@@ -57,8 +57,8 @@ const Admin = ({ onLogout }) => {
                 setSelectedOrder(prev => ({ ...prev, status: newStatus }));
             }
 
-            // WhatsApp Integration for Confirmed/Packed
-            if (order && order.phone && (newStatus === 'Confirmed' || newStatus === 'Packed')) {
+            // WhatsApp Integration for Confirmed/Packed/Out of Stock
+            if (order && order.phone && (newStatus === 'Confirmed' || newStatus === 'Packed' || newStatus === 'Out of Stock')) {
                 const customerName = order.customer_name || order.customerName || 'Customer';
                 let message = '';
 
@@ -75,6 +75,8 @@ const Admin = ({ onLogout }) => {
                     message = `Hello ${customerName}, your order *${orderId}* from Lavender Aqua Farm has been confirmed! We will notify you once it is packed.${orderDetailsText}`;
                 } else if (newStatus === 'Packed') {
                     message = `Hello ${customerName}, your order *${orderId}* from Lavender Aqua Farm has been securely packed and will be shipped soon!${orderDetailsText}`;
+                } else if (newStatus === 'Out of Stock') {
+                    message = `Hello ${customerName}, unfortunately, the items in your order *${orderId}* from Lavender Aqua Farm are currently out of stock. We sincerely apologize for the inconvenience and will reach out to you with alternatives or to process a refund.${orderDetailsText}`;
                 }
 
                 // Format phone number to ensure it has country code if missing
@@ -314,7 +316,8 @@ const Admin = ({ onLogout }) => {
                                             <td className="p-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'Packed' ? 'bg-green-500/20 text-green-300' :
                                                     order.status === 'Confirmed' ? 'bg-blue-500/20 text-blue-300' :
-                                                        'bg-purple-500/20 text-purple-300'
+                                                        order.status === 'Out of Stock' ? 'bg-red-500/20 text-red-300' :
+                                                            'bg-purple-500/20 text-purple-300'
                                                     }`}>
                                                     {order.status}
                                                 </span>
@@ -328,12 +331,20 @@ const Admin = ({ onLogout }) => {
                                                         View Details
                                                     </button>
                                                     {order.status === 'Waiting for Confirmation' && (
-                                                        <button
-                                                            onClick={() => updateOrderStatus(order.id, 'Confirmed')}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition-all"
-                                                        >
-                                                            <Check size={14} /> Confirm
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                onClick={() => updateOrderStatus(order.id, 'Confirmed')}
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition-all"
+                                                            >
+                                                                <Check size={14} /> Confirm
+                                                            </button>
+                                                            <button
+                                                                onClick={() => updateOrderStatus(order.id, 'Out of Stock')}
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-500/20 transition-all"
+                                                            >
+                                                                <X size={14} /> Out of Stock
+                                                            </button>
+                                                        </>
                                                     )}
 
                                                     {order.status === 'Confirmed' && (
