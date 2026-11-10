@@ -17,8 +17,9 @@ const BreedManager = () => {
         refreshBreeds();
     }, []);
 
-    const refreshBreeds = () => {
-        setBreeds(breedService.getAll());
+    const refreshBreeds = async () => {
+        const data = await breedService.getAll();
+        setBreeds(data || []);
     };
 
     const handleOpenModal = (breed = null) => {
@@ -44,7 +45,7 @@ const BreedManager = () => {
         setIsModalOpen(true);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const payload = {
             ...formData,
@@ -53,25 +54,25 @@ const BreedManager = () => {
         };
 
         if (currentBreed) {
-            breedService.update(currentBreed.id, payload);
+            await breedService.update(currentBreed.id, payload);
         } else {
-            breedService.add(payload);
+            await breedService.add(payload);
         }
 
         setIsModalOpen(false);
         refreshBreeds();
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (confirm('Are you sure you want to delete this breed?')) {
-            breedService.delete(id);
+            await breedService.delete(id);
             refreshBreeds();
         }
     };
 
-    const toggleStatus = (breed) => {
+    const toggleStatus = async (breed) => {
         const newStatus = breed.status === 'available' ? 'unavailable' : 'available';
-        breedService.update(breed.id, { status: newStatus });
+        await breedService.update(breed.id, { status: newStatus });
         refreshBreeds();
     };
 

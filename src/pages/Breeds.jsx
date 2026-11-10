@@ -9,6 +9,8 @@ import CartDrawer from '../components/CartDrawer';
 const Breeds = () => {
     const [breeds, setBreeds] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const { setIsCartOpen } = useCart();
 
     useEffect(() => {
@@ -56,7 +58,12 @@ const Breeds = () => {
                     </div>
                 </div>
 
-                {filteredBreeds.length === 0 ? (
+                {loading ? (
+                    <div className="flex justify-center items-center py-24 text-white/70">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mr-3"></div>
+                        Loading breeds...
+                    </div>
+                ) : filteredBreeds.length === 0 ? (
                     <div className="text-center py-20">
                         <p className="text-white/50 text-lg">No breeds found matching your search.</p>
                     </div>

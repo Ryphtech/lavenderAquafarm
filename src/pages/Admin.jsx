@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { breedService, orderService } from '../services/mockData';
 import { Search, Package, Check, Trash2, Edit2, Plus, X, LogOut } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { uploadToR2 } from '../lib/r2';
 
 const Admin = ({ onLogout }) => {
     const [activeTab, setActiveTab] = useState('orders');
@@ -121,24 +121,10 @@ const Admin = ({ onLogout }) => {
         try {
             let uploadedUrls = [];
 
-            // 1. Upload new files
+            // 1. Upload new files to Cloudflare R2
             if (selectedFiles.length > 0) {
                 const uploadPromises = selectedFiles.map(async (file) => {
-                    const fileExt = file.name.split('.').pop();
-                    const fileName = `${Math.random()}.${fileExt}`;
-                    const filePath = `${fileName}`;
-
-                    const { error: uploadError } = await supabase.storage
-                        .from('breeds')
-                        .upload(filePath, file);
-
-                    if (uploadError) throw uploadError;
-
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('breeds')
-                        .getPublicUrl(filePath);
-
-                    return publicUrl;
+                    return await uploadToR2(file, 'breeds');
                 });
 
                 uploadedUrls = await Promise.all(uploadPromises);
@@ -164,34 +150,11 @@ const Admin = ({ onLogout }) => {
             };
 
             if (currentBreed) {
-                try {
-                    await breedService.update(currentBreed.id, breedData);
-                } catch (updateError) {
-                    if (updateError.message && updateError.message.includes('images')) {
-                        console.warn("Images column missing, falling back to single image");
-                        const { images, ...fallbackData } = breedData;
-                        await breedService.update(currentBreed.id, fallbackData);
-                        alert("Note: Multiple images were not saved because the 'images' column is missing in your database. Only the main image was saved.\n\nPlease run the SQL command provided to enable multiple images.");
-                    } else {
-                        throw updateError;
-                    }
-                }
+                await breedService.update(currentBreed.id, breedData);
                 setBreeds(prev => prev.map(b => b.id === currentBreed.id ? { ...b, ...breedData } : b));
             } else {
-                try {
-                    const newBreed = await breedService.add(breedData);
-                    setBreeds(prev => [...prev, newBreed]);
-                } catch (addError) {
-                    if (addError.message && addError.message.includes('images')) {
-                        console.warn("Images column missing, falling back to single image");
-                        const { images, ...fallbackData } = breedData;
-                        const newBreed = await breedService.add(fallbackData);
-                        setBreeds(prev => [...prev, newBreed]);
-                        alert("Note: Multiple images were not saved because the 'images' column is missing in your database. Only the main image was saved.\n\nPlease run the SQL command provided to enable multiple images.");
-                    } else {
-                        throw addError;
-                    }
-                }
+                const newBreed = await breedService.add(breedData);
+                setBreeds(prev => [...prev, newBreed]);
             }
             setShowBreedModal(false);
             setCurrentBreed(null);
@@ -211,7 +174,7 @@ const Admin = ({ onLogout }) => {
             const currentStock = breed.inStock ?? breed.in_stock;
             const newStockStatus = !currentStock;
 
-            // We need to send 'in_stock' to Supabase
+            // We need to send 'in_stock' to database
             await breedService.update(breed.id, { in_stock: newStockStatus });
 
             setBreeds(prev => prev.map(b =>
@@ -275,7 +238,12 @@ const Admin = ({ onLogout }) => {
                     </div>
                 </div>
 
-                {activeTab === 'orders' ? (
+                {loading ? (
+                    <div className="flex justify-center items-center py-20 text-white/70">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
+                        Loading dashboard data...
+                    </div>
+                ) : activeTab === 'orders' ? (
                     <div className="bg-surface-dark rounded-2xl shadow-sm border border-white/5 overflow-hidden">
                         <div className="p-4 border-b border-white/5">
                             <div className="relative max-w-md">

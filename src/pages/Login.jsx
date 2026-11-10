@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import logo from '../assets/logo.jpg';
 
 const Login = () => {
@@ -17,15 +18,17 @@ const Login = () => {
         setError('');
 
         try {
-            const { error: authError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
-            if (authError) throw authError;
+            await signInWithEmailAndPassword(auth, email, password);
             navigate('/admin');
         } catch (err) {
-            setError(err.message || 'Invalid credentials');
+            console.error('Firebase Login Error:', err);
+            if (err.code === 'auth/configuration-not-found') {
+                setError('Email/Password provider not enabled in Firebase Console. Please enable it under Authentication > Sign-in method.');
+            } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+                setError('Invalid email or password.');
+            } else {
+                setError(err.message || 'Failed to sign in.');
+            }
         } finally {
             setLoading(false);
         }

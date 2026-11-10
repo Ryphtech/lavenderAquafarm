@@ -309,7 +309,12 @@ const Home = () => {
                 </div>
 
                 {/* Product Grid */}
-                {filteredProducts.length > 0 ? (
+                {loading ? (
+                    <div className="flex justify-center items-center py-20 text-white/70">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mr-3"></div>
+                        Loading fish collection...
+                    </div>
+                ) : filteredProducts.length > 0 ? (
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {filteredProducts.map(product => (
                             <ProductCard

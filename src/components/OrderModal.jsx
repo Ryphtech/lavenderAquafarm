@@ -45,7 +45,7 @@ const OrderModal = ({ isOpen, onClose }) => {
         };
 
         try {
-            // Save to Supabase
+            // Save to Firebase Firestore
             const savedOrder = await orderService.create(newOrder);
 
             // Construct multi-item WhatsApp message
